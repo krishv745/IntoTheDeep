@@ -131,6 +131,7 @@ public class FOTeleOp extends OpMode {
 
     @Override
     public void loop() {
+
         switch (intakeState) {
             case intakeRest:
                 if (gamepad1.x) {
