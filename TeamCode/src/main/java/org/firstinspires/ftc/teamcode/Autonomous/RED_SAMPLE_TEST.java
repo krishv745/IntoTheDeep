@@ -15,14 +15,97 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 // Non-RR imports
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.teamcode.tuningVal.MecanumDrive;
 
 @Config
 @Autonomous(name = "RED_SAMPLE_AUTO", group = "Autonomous")
 public class RED_SAMPLE_TEST extends LinearOpMode {
+    
+    public class Intake {
+        private CRServo servoInGeckoL;
+        private CRServo servoInGeckoR;
+        private CRServo servoInRoller;
+        private DcMotorEx intakeSlidesMotor;
+        private ElapsedTime timer;
+
+        private final int ROLL_ON = 1;
+        private final int ROLL_OFF = 0;
+        private final int IN_SLIDES_OUT = 4000;
+        private final int IN_SLIDES_IN = 0;
+        private final double IN_SLIDES_TIMER = 10.0;
+
+        public Intake(HardwareMap hardwareMap) {
+            intakeSlidesMotor = (DcMotorEx) hardwareMap.dcMotor.get("intake");
+            intakeSlidesMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            intakeSlidesMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            servoInRoller = (CRServo) hardwareMap.servo.get("inRoll");
+            servoInGeckoL = (CRServo) hardwareMap.servo.get("geckoL");
+            servoInGeckoR = (CRServo) hardwareMap.servo.get("geckoR");
+
+            timer = new ElapsedTime();
+
+            servoInGeckoL.setPower(ROLL_OFF);
+            servoInGeckoR.setPower(ROLL_OFF);
+            servoInRoller.setPower(ROLL_OFF);
+        }
+        
+        public class IntakeSlidesOut implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                timer.reset();
+                intakeSlidesMotor.setTargetPosition(IN_SLIDES_OUT);
+                while (timer.milliseconds() < IN_SLIDES_TIMER) {
+
+                }
+                return false;
+            }
+        }
+        public Action slidesOut() {return new IntakeSlidesOut();}
+
+        public class IntakeWheelRun implements Action {
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                servoInRoller.setPower(ROLL_ON);
+                servoInGeckoL.setPower(ROLL_ON);
+                servoInGeckoR.setPower(ROLL_ON);
+                return false;
+            }
+        }
+        public Action wheelsOn() {return new IntakeWheelRun();}
+
+        public class IntakeWheelOff implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                servoInRoller.setPower(ROLL_OFF);
+                servoInGeckoL.setPower(ROLL_OFF);
+                servoInGeckoR.setPower(ROLL_OFF);
+                return false;
+            }
+        }
+        public Action wheelsOff() {return new IntakeWheelOff();}
+
+        public class IntakeSlidesIn implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                timer.reset();
+                intakeSlidesMotor.setTargetPosition(IN_SLIDES_IN);
+                while (timer.milliseconds() < IN_SLIDES_TIMER) {
+
+                }
+                return false;
+            }
+        }
+        public Action slidesIn() {return new IntakeSlidesIn();}
+    }
 
 
     @Override
