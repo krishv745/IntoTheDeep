@@ -119,7 +119,16 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
         final double ROTATE_REST = 0.4;
 
         public Outtake(HardwareMap hardwareMap) {
+            leftSlidesOuttakeMotor = (DcMotorEx) hardwareMap.dcMotor.get("outtakeLeft");
+            rightSlidesOuttakeMotor = (DcMotorEx) hardwareMap.dcMotor.get("outtakeRight");
+
+            leftSlidesOuttakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // vertical - 5000 ticks
+            rightSlidesOuttakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            servoOutClaw = hardwareMap.servo.get("outClaw");
+            servoOutRotate = hardwareMap.servo.get("outRotate");
             
+            timer = new ElapsedTime();
         }
     }
 
