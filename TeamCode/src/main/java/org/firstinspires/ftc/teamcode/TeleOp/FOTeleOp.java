@@ -2,15 +2,19 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -20,16 +24,17 @@ public class FOTeleOp extends OpMode {
 
     IMU imu;
     ColorSensor color;
-
+  
     DcMotor frontLeftMotor;
     DcMotor frontRightMotor;
     DcMotor backLeftMotor;
     DcMotor backRightMotor;
-
+  
     DcMotorEx leftSlidesOuttakeMotor;
     DcMotorEx rightSlidesOuttakeMotor;
     DcMotorEx intakeSlidesMotor;
     DcMotorEx turretMotor;
+
 
     double y = 0;
     double x = 0;
@@ -64,6 +69,7 @@ public class FOTeleOp extends OpMode {
         intakeWheelRun,
         intakeSlideIn,
 
+
     };
     public enum SampleDrop {
         IntakeSlidesRetract,
@@ -75,6 +81,7 @@ public class FOTeleOp extends OpMode {
     //This is the timer for the arm
     ElapsedTime armTimer = new ElapsedTime();
     //This is the starting state
+
     IntakeState intakeState = IntakeState.intakeRest;
 
     @Override
@@ -86,7 +93,9 @@ public class FOTeleOp extends OpMode {
         leftSlidesOuttakeMotor = (DcMotorEx) hardwareMap.dcMotor.get("outtakeLeft");
         rightSlidesOuttakeMotor = (DcMotorEx) hardwareMap.dcMotor.get("outtakeRight");
         intakeSlidesMotor = (DcMotorEx) hardwareMap.dcMotor.get("intake");
+
 //        turretMotor = (DcMotorEx) hardwareMap.dcMotor.get("turret");
+
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -95,6 +104,7 @@ public class FOTeleOp extends OpMode {
         leftSlidesOuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightSlidesOuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeSlidesMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 //        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         leftSlidesOuttakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // vertical - 5000 ticks
@@ -122,6 +132,7 @@ public class FOTeleOp extends OpMode {
 
     @Override
     public void start() {
+
         servoOutClaw.setPosition(CLAW_REST);
         servoOutRotate.setPosition(ROTATE_REST);
         servoInGeckoL.setPower(ROLL_OFF);
