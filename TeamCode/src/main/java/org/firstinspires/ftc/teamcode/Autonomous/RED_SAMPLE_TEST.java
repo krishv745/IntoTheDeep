@@ -107,6 +107,22 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
         public Action slidesIn() {return new IntakeSlidesIn();}
     }
 
+    public class Outtake {
+        private DcMotorEx leftSlidesOuttakeMotor;
+        private DcMotorEx rightSlidesOuttakeMotor;
+        private Servo servoOutClaw;
+        private Servo servoOutRotate;
+
+        private ElapsedTime timer;
+
+        final double CLAW_REST = 0.4;
+        final double ROTATE_REST = 0.4;
+
+        public Outtake(HardwareMap hardwareMap) {
+            
+        }
+    }
+
 
     @Override
     public void runOpMode() {
