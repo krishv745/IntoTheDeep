@@ -115,8 +115,15 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
 
         private ElapsedTime timer;
 
-        final double CLAW_REST = 0.4;
-        final double ROTATE_REST = 0.4;
+        final double CLAW_REST = 0.2;
+        final double CLAW_CLOSED = 0.8;
+        final double ROTATE_UP = 0.2;
+        final double ROTATE_DOWN = 0.8;
+
+        private final int OUT_SLIDES_DOWN = 0;
+        private final int OUT_SLIDES_UP = 5000;
+
+        private final double OUT_SLIDES_TIMER = 10.0;
 
         public Outtake(HardwareMap hardwareMap) {
             leftSlidesOuttakeMotor = (DcMotorEx) hardwareMap.dcMotor.get("outtakeLeft");
@@ -130,6 +137,70 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
             
             timer = new ElapsedTime();
         }
+
+        public class OuttakeSlidesDown implements Action {
+            @Override
+            public boolean run (@NonNull TelemetryPacket telemetryPacket) {
+                timer.reset();
+                leftSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_DOWN);
+                rightSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_DOWN);
+                while (timer.milliseconds() < OUT_SLIDES_TIMER) {
+
+                }
+                return false;
+            }
+        }
+        public Action slidesDown() {return new OuttakeSlidesDown();}
+
+        public class OuttakeSlidesUp implements Action {
+            @Override
+            public boolean run (@NonNull TelemetryPacket telemetryPacket) {
+                timer.reset();
+                leftSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_UP);
+                rightSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_UP);
+                while (timer.milliseconds() < OUT_SLIDES_TIMER) {
+
+                }
+                return false;
+            }
+        }
+        public Action slidesUp() {return new OuttakeSlidesUp();}
+
+        public class ClawOpen implements Action {
+            @Override
+            public boolean run (@NonNull TelemetryPacket telemetryPacket) {
+                servoOutClaw.setPosition(CLAW_REST);
+                return false;
+            }
+        }
+        public Action clawOpen() {return new ClawOpen();}
+
+        public class ClawClosed implements Action {
+            @Override
+            public boolean run (@NonNull TelemetryPacket telemetryPacket) {
+                servoOutClaw.setPosition(CLAW_CLOSED);
+                return false;
+            }
+        }
+        public Action clawClosed() {return new ClawClosed();}
+
+        public class RotateDown implements Action {
+            @Override
+            public boolean run (@NonNull TelemetryPacket telemetryPacket) {
+                servoOutRotate.setPosition(ROTATE_UP);
+                return false;
+            }
+        }
+        public Action rotateDown() {return new RotateDown();}
+
+        public class RotateUp implements Action {
+            @Override
+            public boolean run (@NonNull TelemetryPacket telemetryPacket) {
+                servoOutRotate.setPosition(ROTATE_DOWN);
+                return false;
+            }
+        }
+        public Action rotateUp() {return new RotateUp();}
     }
 
 
