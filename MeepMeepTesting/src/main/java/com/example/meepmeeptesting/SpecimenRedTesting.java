@@ -18,6 +18,7 @@ public class SpecimenRedTesting {
                 .build();
 
         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(30, -61, 0))
+
                 .strafeTo(new Vector2d(48, -40))
                 .turn(Math.toRadians(90))
                 .turn(Math.toRadians(-180))
