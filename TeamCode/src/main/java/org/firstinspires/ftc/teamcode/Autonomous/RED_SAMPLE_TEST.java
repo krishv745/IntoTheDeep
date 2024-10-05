@@ -16,12 +16,15 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.tuningVal.MecanumDrive;
 
 @Config
@@ -34,6 +37,8 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
         private CRServo servoInRoller;
         private DcMotorEx intakeSlidesMotor;
         private ElapsedTime timer;
+
+        private ColorSensor color;
 
         private final int ROLL_ON = 1;
         private final int ROLL_OFF = 0;
@@ -51,6 +56,7 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
             servoInGeckoR = (CRServo) hardwareMap.servo.get("geckoR");
 
             timer = new ElapsedTime();
+            color = hardwareMap.get(ColorSensor.class, "Color");
 
             servoInGeckoL.setPower(ROLL_OFF);
             servoInGeckoR.setPower(ROLL_OFF);
@@ -105,6 +111,22 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
             }
         }
         public Action slidesIn() {return new IntakeSlidesIn();}
+
+        public class IntakeRunner implements Action {
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                slidesOut();
+                wheelsOn();
+                while ((((DistanceSensor) color).getDistance(DistanceUnit.CM)) > 0.1) {
+
+                }
+                wheelsOff();
+                slidesIn();
+                return false;
+            }
+        }
+        public Action run() {return new IntakeRunner();}
     }
 
     public class Outtake {
@@ -120,10 +142,16 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
         final double ROTATE_UP = 0.2;
         final double ROTATE_DOWN = 0.8;
 
+        private final int OUT_SLIDES_BASE = 5000;
         private final int OUT_SLIDES_DOWN = 0;
-        private final int OUT_SLIDES_UP = 5000;
+        private final int OUT_SLIDES_SAMPLE = 4800;
+        private final int OUT_SLIDES_SPECIMEN_UP = 4000;
+        private final int OUT_SLIDES_SPECIMEN_DOWN = 3800;
 
-        private final double OUT_SLIDES_TIMER = 10.0;
+        private final double OUT_BASE_TIMER = 12.0;
+        private final double OUT_SAMPLE_TIMER = 10.0;
+        private final double OUT_SPECIMEN_UP_TIMER = 8.0;
+        private final double OUT_SPECIMEN_DOWN_TIMER = 2.0;
 
         public Outtake(HardwareMap hardwareMap) {
             leftSlidesOuttakeMotor = (DcMotorEx) hardwareMap.dcMotor.get("outtakeLeft");
@@ -137,6 +165,22 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
             
             timer = new ElapsedTime();
         }
+
+        public class OuttakeReset implements Action {
+            @Override
+            public boolean run (@NonNull TelemetryPacket telemetryPacket) {
+                timer.reset();
+                leftSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_BASE);
+                rightSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_BASE);
+                while (timer.milliseconds() < OUT_BASE_TIMER) {
+
+                }
+                clawOpen();
+                rotateUp();
+                return false;
+            }
+        }
+        public Action reset() {return new OuttakeReset();}
 
         public class OuttakeSlidesDown implements Action {
             @Override
@@ -152,19 +196,43 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
         }
         public Action slidesDown() {return new OuttakeSlidesDown();}
 
-        public class OuttakeSlidesUp implements Action {
+        public class OuttakeSlidesSample implements Action {
             @Override
             public boolean run (@NonNull TelemetryPacket telemetryPacket) {
                 timer.reset();
-                leftSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_UP);
-                rightSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_UP);
+                leftSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_SAMPLE);
+                rightSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_SAMPLE);
                 while (timer.milliseconds() < OUT_SLIDES_TIMER) {
 
                 }
                 return false;
             }
         }
-        public Action slidesUp() {return new OuttakeSlidesUp();}
+        public Action slidesSample() {return new OuttakeSlidesUp();}
+
+        public class OuttakeSlidesSpecimen implements Action {
+            @Override
+            public boolean run (@NonNull TelemteryPacket telemetryPacket) {
+                timer.reset();
+                leftSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_SPECIMEN_UP);
+                rightSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_SPECIMEN_UP);
+                while (timer.milliseconds() < OUT_SPECIMEN_UP_TIMER) {
+
+                }
+
+                timer.reset();
+                leftSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_SPECIMEN_DOWN);
+                rightSlidesOuttakeMotor.setTargetPosition(OUT_SLIDES_SPECIMEN_DOWN);
+                while (imer.milliseconds() < OUT_SPECIMEN_DOWN_TIMER) {
+
+                }
+
+                clawOpen();
+
+                return false;
+            }
+        }
+        public Action slidesSpecimen() {return new OuttakeSlidesSpecimen();}
 
         public class ClawOpen implements Action {
             @Override
@@ -201,6 +269,19 @@ public class RED_SAMPLE_TEST extends LinearOpMode {
             }
         }
         public Action rotateUp() {return new RotateUp();}
+
+        public class OuttakeLoad implements Action {
+            @Override
+            public boolean run (@NonNull TelemetryPacket telemetryPacket) {
+                rotateDown();
+                slidesDown();
+                clawClosed();
+                rotateUp();
+            }
+        }
+        public Action load() {return new OuttakeLoad();}
+
+
     }
 
 
