@@ -12,7 +12,7 @@ public class SpecimenRedEject {
         Vector2d p2 = new Vector2d(50,-42);
         Vector2d p3 = new Vector2d(58,-42);
         Vector2d target = new Vector2d(10,-35);
-        Vector2d end = new Vector2d(60,-60);
+        Vector2d end = new Vector2d(50,-60);
         Vector2d recieve = new Vector2d(58,-58);
 
 
@@ -21,7 +21,7 @@ public class SpecimenRedEject {
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(80, 60, Math.toRadians(360), Math.toRadians(360), 15)
+                .setConstraints(100, 100, Math.toRadians(720), Math.toRadians(720), 10)
                 .build();
 
 
@@ -41,33 +41,33 @@ public class SpecimenRedEject {
                 .splineTo(p3,Math.toRadians(60))
                 .waitSeconds(0.5)
                 .turn(Math.toRadians(-150))
-                        .waitSeconds(0.5)
-                        .lineToY(-60)
-                        .waitSeconds(0.5)
-                        .lineToY(-50)
-                        .waitSeconds(0.01)
-                        .splineTo(target,Math.toRadians(90))
-                        .waitSeconds(0.5)
-                        .lineToY(-50)
-                        .waitSeconds(0.01)
-                        .splineTo(recieve,Math.toRadians(-90))
-                        .waitSeconds(0.5)
-                        .lineToY(-50)
-                        .waitSeconds(0.01)
-                        .splineTo(target,Math.toRadians(90))
-                        .waitSeconds(0.5)
-                        .lineToY(-50)
-                        .waitSeconds(0.01)
-                        .splineTo(recieve,Math.toRadians(-90))
-                        .waitSeconds(0.5)
-                        .lineToY(-50)
-                        .waitSeconds(0.01)
-                        .splineTo(target,Math.toRadians(90))
-                        .waitSeconds(0.5)
-                        .lineToY(-50)
-                        .waitSeconds(0.01)
-                        .splineTo(recieve,Math.toRadians(-90))
-                        .lineToY(-65)
+                .waitSeconds(0.5)
+                .lineToY(-60)
+                .waitSeconds(0.5)
+                .lineToY(-50)
+                .waitSeconds(0.01)
+                .splineTo(target,Math.toRadians(90))
+                .waitSeconds(0.5)
+                .lineToY(-50)
+                .waitSeconds(0.01)
+                .splineTo(recieve,Math.toRadians(-90))
+                .waitSeconds(0.5)
+                .lineToY(-50)
+                .waitSeconds(0.01)
+                .splineTo(target,Math.toRadians(90))
+                .waitSeconds(0.5)
+                .lineToY(-50)
+                .waitSeconds(0.01)
+                .splineTo(recieve,Math.toRadians(-90))
+                .waitSeconds(0.5)
+                .lineToY(-50)
+                .waitSeconds(0.01)
+                .splineTo(target,Math.toRadians(90))
+                .waitSeconds(0.5)
+                .lineToY(-50)
+                .waitSeconds(0.01)
+                .strafeTo(end)
+                .lineToY(-65)
                 .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)

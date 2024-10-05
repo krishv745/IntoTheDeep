@@ -20,7 +20,7 @@
 
             RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                     // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                    .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
+                    .setConstraints(100, 100, Math.toRadians(270), Math.toRadians(270), 15)
                     .build();
             Vector2d yellow1 = new Vector2d(-47.9,-38.1);
             Vector2d yellow2 = new Vector2d(-59.2,-38.1);
