@@ -8,10 +8,9 @@ import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 public class SpecimenRed {
     public static void main(String[] args) {
-        Vector2d pos1 = new Vector2d(58,-40);
-        Vector2d pos2 = new Vector2d(55,-40);
-        Vector2d pos3 = new Vector2d(50,-40);
-        Vector2d home = new Vector2d(60,-48);
+        Vector2d pos1 = new Vector2d(58,-45);
+        Vector2d pos3 = new Vector2d(50,-45);
+        Vector2d home = new Vector2d(60,-45);
         Vector2d target = new Vector2d(10,-36);
         Vector2d end = new Vector2d(60,-60);
 
@@ -21,20 +20,19 @@ public class SpecimenRed {
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(80, 60, Math.toRadians(180), Math.toRadians(180), 15)
+                .setConstraints(100, 100, Math.toRadians(270), Math.toRadians(270), 15)
                 .build();
 
 
         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(10, -60, Math.toRadians(90)))
                 .lineToY(-33)
                 .waitSeconds(0.5)
-                .lineToY(-40)
-                .strafeTo(pos1)
-                .turn(Math.toRadians(-30))
+                .lineToY(-50)
+                .splineTo(pos1,Math.toRadians(-120))
                 .waitSeconds(0.5)
                 .splineTo(home,Math.toRadians(-90))
                 .waitSeconds(0.5)
-                .splineTo(pos2,Math.toRadians(90))
+                .splineTo(pos1,Math.toRadians(90))
                 .waitSeconds(0.5)
                 .splineTo(home,Math.toRadians(-90))
                 .waitSeconds(0.5)
