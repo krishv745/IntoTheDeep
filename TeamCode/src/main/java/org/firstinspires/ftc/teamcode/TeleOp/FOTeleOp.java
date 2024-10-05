@@ -1,13 +1,25 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.TeleOp;
+
+import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.IntakeRotate;
+import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.IntakeSlidesRetract;
+import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.OuttakeHold;
+import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.OuttakeRotate;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -16,34 +28,53 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class FOTeleOp extends OpMode {
 
     IMU imu;
+    ColorSensor color;
+  
     DcMotor frontLeftMotor;
     DcMotor frontRightMotor;
     DcMotor backLeftMotor;
     DcMotor backRightMotor;
+  
     DcMotorEx leftSlidesOuttakeMotor;
     DcMotorEx rightSlidesOuttakeMotor;
     DcMotorEx intakeSlidesMotor;
     DcMotorEx turretMotor;
+
+
     double y = 0;
     double x = 0;
     double rx = 0;
-    CRServo servoIntakeSpin;
-    Servo servoIntakeRotate;
-    Servo servoOuttakeClamp;
-    Servo servoOuttakeRotate;
-    Servo servoOuttakeArmRotate;
+    ElapsedTime timer;
+
+    Servo servoOutClaw;
+    Servo servoOutRotate;
+    CRServo servoInGeckoL;
+    CRServo servoInGeckoR;
+    CRServo servoInRoller;
+
+    // (outtake servo) - one claw, one rotate claw,
+    // (intake servo) - 2 gecko wheels, one roller
+
+    // VALUES
+
+    // Outtake
+    final double CLAW_REST = 0.4;
+    final double ROTATE_REST = 0.4;
+
+    // Intake
+    final int ROLL_ON = 1;
+    final int ROLL_OFF = 0;
+    final int IN_SLIDES_OUT = 4000;
+    final int IN_SLIDES_IN = 0;
+    final double IN_SLIDES_TIMER = 10.0;
+
+    public enum IntakeState {
+        intakeRest,
+        intakeSlideOut,
+        intakeWheelRun,
+        intakeSlideIn,
 
 
-    //Initialize all servos
-    //Initialize all sensors
-    //Initialize all variables
-
-    //This is an example state machine for the arm
-    public enum TransferState {
-        IntakeSlidesRetract,
-        IntakeRotate,
-        OuttakeHold,
-        OuttakeRotate
     };
     public enum SampleDrop {
         IntakeSlidesRetract,
@@ -55,8 +86,9 @@ public class FOTeleOp extends OpMode {
     //This is the timer for the arm
     ElapsedTime armTimer = new ElapsedTime();
     //This is the starting state
-    TransferState transferState = TransferState.IntakeSlidesRetract;
 
+    IntakeState intakeState = IntakeState.intakeRest;
+    SampleDrop sampleDrop = SampleDrop.IntakeSlidesRetract;
     @Override
     public void init() {
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
@@ -66,7 +98,9 @@ public class FOTeleOp extends OpMode {
         leftSlidesOuttakeMotor = (DcMotorEx) hardwareMap.dcMotor.get("outtakeLeft");
         rightSlidesOuttakeMotor = (DcMotorEx) hardwareMap.dcMotor.get("outtakeRight");
         intakeSlidesMotor = (DcMotorEx) hardwareMap.dcMotor.get("intake");
-        turretMotor = (DcMotorEx) hardwareMap.dcMotor.get("turret");
+
+//        turretMotor = (DcMotorEx) hardwareMap.dcMotor.get("turret");
+
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -75,14 +109,22 @@ public class FOTeleOp extends OpMode {
         leftSlidesOuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightSlidesOuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeSlidesMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        servoIntakeSpin = (CRServo) hardwareMap.servo.get("intakeSpin");
-        servoIntakeRotate = hardwareMap.servo.get("intakeRotate");
-        servoOuttakeClamp = hardwareMap.servo.get("outtakeClamp");
-        servoOuttakeRotate = hardwareMap.servo.get("outtakeRotate");
-        servoOuttakeArmRotate = hardwareMap.servo.get("outtakeArmRotate");
+//        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        leftSlidesOuttakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // vertical - 5000 ticks
+        rightSlidesOuttakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        intakeSlidesMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // horizontal - 4000 ticks
+
+        servoOutClaw = hardwareMap.servo.get("outClaw");
+        servoOutRotate = hardwareMap.servo.get("outRotate");
+        servoInRoller = (CRServo) hardwareMap.servo.get("inRoll");
+        servoInGeckoL = (CRServo) hardwareMap.servo.get("geckoL");
+        servoInGeckoR = (CRServo) hardwareMap.servo.get("geckoR");
+
+        timer = new ElapsedTime();
+
+        color = hardwareMap.get(ColorSensor.class, "Color");
 
         imu = hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
@@ -95,26 +137,58 @@ public class FOTeleOp extends OpMode {
 
     @Override
     public void start() {
-        servoIntakeRotate.setPosition(0.4); //0.4 to 0.8
-        servoOuttakeClamp.setPosition(0.4); //0.4 to 0.5
-        servoOuttakeRotate.setPosition(0.4); //0.4 to 0.6
-        servoOuttakeArmRotate.setPosition(0.4); //0.4 to 0.8
+
+        servoOutClaw.setPosition(CLAW_REST);
+        servoOutRotate.setPosition(ROTATE_REST);
+        servoInGeckoL.setPower(ROLL_OFF);
+        servoInGeckoR.setPower(ROLL_OFF);
+        servoInRoller.setPower(ROLL_OFF);
     }
 
     @Override
     public void loop() {
-        switch (transferState) {
+
+        switch (intakeState) {
+            case intakeRest:
+                if (gamepad1.x) {
+                    intakeState = intakeState.intakeSlideOut;
+                }
+            case intakeSlideOut:
+                timer.reset();
+                intakeSlidesMotor.setTargetPosition(IN_SLIDES_OUT);
+                while (timer.milliseconds() < IN_SLIDES_TIMER) {
+
+                }
+                intakeState = intakeState.intakeWheelRun;
+            case intakeWheelRun:
+                double distance = ((DistanceSensor) color).getDistance(DistanceUnit.CM);
+                while (distance > 0.1) {
+                    servoInRoller.setPower(ROLL_ON);
+                    servoInGeckoL.setPower(ROLL_ON);
+                    servoInGeckoR.setPower(ROLL_ON);
+                }
+
+                servoInRoller.setPower(ROLL_OFF);
+                servoInGeckoL.setPower(ROLL_OFF);
+                servoInGeckoR.setPower(ROLL_OFF);
+
+                intakeState = intakeState.intakeSlideIn;
+            case intakeSlideIn:
+                timer.reset();
+                intakeSlidesMotor.setTargetPosition(IN_SLIDES_IN);
+                while (timer.milliseconds() < IN_SLIDES_TIMER) {
+
+                }
+                intakeState = intakeState.intakeRest;
+        }
+
+        switch (sampleDrop){
             case IntakeSlidesRetract:
-               // if intakeColorSensor.distance() <= 1{
-
-
-            //}
-            case IntakeRotate:
                 
+            case IntakeRotate:
             case OuttakeHold:
             case OuttakeRotate:
         }
-
 
 
         if (gamepad1.right_trigger > 0) {
