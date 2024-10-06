@@ -19,7 +19,7 @@ public class SampleBlue{
         Vector2d end = new Vector2d(25,10);
         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(10, 61, Math.toRadians(90)))
                 .lineToY(36)
-                .waitSeconds(0.5)
+                .waitSeconds(0.0001)
                 .splineTo(yellow,Math.toRadians(-80))
                 .lineToYSplineHeading(55,Math.toRadians(-135))
                 .lineToYSplineHeading(42,Math.toRadians(-115))
