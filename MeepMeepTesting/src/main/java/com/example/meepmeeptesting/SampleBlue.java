@@ -17,6 +17,7 @@ public class SampleBlue{
 
         Vector2d yellow = new Vector2d(55,42);
         Vector2d end = new Vector2d(25,10);
+        Vector2d basket = new Vector2d(55,55);
         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(10, 61, Math.toRadians(90)))
                 .lineToY(36)
                 .waitSeconds(0.0001)
@@ -28,6 +29,35 @@ public class SampleBlue{
                 .lineToYSplineHeading(55,Math.toRadians(-135))//idk
                 .waitSeconds(0.01)
                 .splineTo(end,Math.toRadians(180))
+                .waitSeconds(0.01)
+                .lineToX(40)
+                .splineTo(basket,Math.toRadians(45))
+                .waitSeconds(0.01)
+                .splineTo(end,Math.toRadians(180))
+                .waitSeconds(0.01)
+                .lineToX(40)
+                .splineTo(basket,Math.toRadians(45))
+                .waitSeconds(0.01)
+                .splineTo(end,Math.toRadians(180))
+                .waitSeconds(0.01)
+                .lineToX(40)
+                .splineTo(basket,Math.toRadians(45))
+                .waitSeconds(0.01)
+                .splineTo(end,Math.toRadians(180))
+                .waitSeconds(0.01)
+                .lineToX(40)
+                .splineTo(basket,Math.toRadians(45))
+                .waitSeconds(0.01)
+                .splineTo(end,Math.toRadians(180))
+                .waitSeconds(0.01)
+                .lineToX(40)
+                .splineTo(basket,Math.toRadians(45))
+                .waitSeconds(0.01)
+                .splineTo(end,Math.toRadians(180))
+                .waitSeconds(0.01)
+                .lineToX(40)
+                .splineTo(basket,Math.toRadians(45))
+
                 .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)
