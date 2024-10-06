@@ -57,11 +57,11 @@ public class FOTeleOp extends OpMode {
     //Intake State
     public enum IntakeState {
         intakeIn,
-        intakeOut,
+        intakeMove,
         intakeRotate,
-        intakeRun,
-        intakeRetract
+        intakeRun
     };
+
 //    public enum SampleDrop {
 //        IntakeSlidesRetract,
 //        IntakeRotate,
@@ -71,6 +71,7 @@ public class FOTeleOp extends OpMode {
 
     //This is the timer for the arm
     ElapsedTime timerIntakeSlidesOut = new ElapsedTime();
+    ElapsedTime timerIntakeRetract = new ElapsedTime();
     IntakeState intakeState = IntakeState.intakeIn;
 
     @Override
@@ -111,6 +112,7 @@ public class FOTeleOp extends OpMode {
         imu.initialize(parameters);
 
         timerIntakeSlidesOut.reset();
+        timerIntakeRetract.reset();
     }
 
     @Override
@@ -127,19 +129,13 @@ public class FOTeleOp extends OpMode {
 
     @Override
     public void loop() {
-//        public enum IntakeState {
-//            intakeIn,
-//            intakeOut,
-//            intakeRotateDown,
-//            intakeRun,
-//            intakeRetract
-//        };
 
         switch (intakeState) {
-            case intakeOut:
-                if (servoIntakeSlidesL.getPosition() < 0.31 && servoIntakeSlidesR.getPosition() < 0.31) {
+            case intakeMove:
+                if (servoIntakeSlidesL.getPosition() > 0.29 && servoIntakeSlidesL.getPosition() < 0.71) {
                     intakeSlidesPosL = servoIntakeSlidesL.getPosition();
                     intakeSlidesPosR = servoIntakeSlidesR.getPosition();
+                    timerIntakeSlidesOut.reset();
                     if (signum(gamepad2.right_stick_y) > 0 && timerIntakeSlidesOut.milliseconds() > 100) {
                         intakeSlidesPosL += 0.03;
                         intakeSlidesPosR += 0.03;
@@ -157,16 +153,38 @@ public class FOTeleOp extends OpMode {
                     }
                 }
             case intakeRotate:
+                if (signum(gamepad2.right_stick_y) > 0 || signum(gamepad2.right_stick_y) < 0) {
+                    intakeState = IntakeState.intakeMove;
+                }
                 if (gamepad2.start) {
                     if (servoIntakeRotate.getPosition() < 0.31) {
                         servoIntakeRotate.setPosition(0.6);
                         intakeState = IntakeState.intakeRun;
                     } else if (servoIntakeRotate.getPosition() > 0.59) {
+                        timerIntakeRetract.reset();
                         servoIntakeRotate.setPosition(0.3);
-                        intakeState = IntakeState.intakeRetract;
-
+                        if (timerIntakeRetract.milliseconds() > 300) {
+                            servoIntakeSlidesL.setPosition(0.3);
+                            servoIntakeSlidesR.setPosition(0.3);
+                        }
+                        intakeState = IntakeState.intakeIn;
                     }
                 }
+            case intakeRun:
+                if (gamepad2.right_bumper) {
+                    servoIntakeL.setPower(1);
+                    servoIntakeR.setPower(1);
+                    servoIntakeF.setPower(1);
+                } else if (gamepad2.left_bumper) {
+                    servoIntakeL.setPower(-1);
+                    servoIntakeR.setPower(-1);
+                    servoIntakeF.setPower(-1);
+                }
+                intakeState = IntakeState.intakeRotate;
+        }
+
+
+
 
 
 
