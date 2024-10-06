@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Math.signum;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -46,6 +48,11 @@ public class FOTeleOp extends OpMode {
     double y = 0;
     double x = 0;
     double rx = 0;
+    double intakeSlidesPosL = 0;
+    double intakeSlidesPosR = 0;
+    int position = 0;
+    int prevposition = 0;
+    boolean intakeSlides = false;
 
     public enum IntakeState {
         intakeIn,
@@ -85,11 +92,6 @@ public class FOTeleOp extends OpMode {
         motorOuttakeSlidesR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //        rigSlidesMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorTurret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION); // vertical - 5000 ticks
-        motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        rigSlidesMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // horizontal - 4000 ticks
-        motorTurret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         servoOutClaw = hardwareMap.servo.get("outClaw");
         servoOutRotate = hardwareMap.servo.get("outRotate");
@@ -136,16 +138,32 @@ public class FOTeleOp extends OpMode {
 
         switch (intakeState) {
             case intakeOut:
-                if (servoIntakeSlidesL.getPosition() <= 0.31 && servoIntakeSlidesR.getPosition() <= 0.31) {
-                    if (gamepad2.left_stick_y > 0)
+                if (servoIntakeSlidesL.getPosition() >= 0.3 && servoIntakeSlidesR.getPosition() >= 0.3) {
+                    intakeSlidesPosL = servoIntakeSlidesL.getPosition();
+                    intakeSlidesPosR = servoIntakeSlidesR.getPosition();
+                    if (signum(gamepad2.left_stick_y) == 1) {
+                        intakeSlidesPosL += 0.03;
+                        intakeSlidesPosR += 0.03;
+                        servoIntakeSlidesL.setPosition(intakeSlidesPosL);
+                        servoIntakeSlidesR.setPosition(intakeSlidesPosR);
+                    } else if (signum(gamepad2.left_stick_y) == -1) {
+                        intakeSlidesPosL -= 0.03;
+                        intakeSlidesPosR -= 0.03;
+                        servoIntakeSlidesL.setPosition(intakeSlidesPosL);
+                        servoIntakeSlidesR.setPosition(intakeSlidesPosR);
+                    }
                 }
-
-                    servoIntakeSlidesL.setPosition(0.7);
-                    servoIntakeSlidesR.setPosition(0.7);
-
-                }
-                timerIntakeSlides.reset();
             case intakeRotateDown:
+                if (gamepad2.start) {
+                    if (servoIntakeRotate.getPosition() < 0.31) {
+                        servoIntakeRotate.setPosition(0.6);
+                    } else if (servoIntakeRotate.getPosition() > 0.59) {
+                        servoIntakeRotate.setPosition(0.3);
+                    }
+                }
+
+
+
 
             case intakeSlideOut:
                 timer.reset();
@@ -177,6 +195,41 @@ public class FOTeleOp extends OpMode {
         }
 
 
+
+        if (servoIntakeSlidesL.getPosition() <= 0.31 && servoIntakeSlidesR.getPosition() <= 0.31) {
+            if (gamepad2.left_stick_y != 0) {
+                motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                motorOuttakeSlidesL.setVelocity(signum(gamepad2.left_stick_y)*2000); //signum returns -1 if down, 1 if up, and 0 if not moved
+                motorOuttakeSlidesR.setVelocity(signum(gamepad2.left_stick_y)*2000);
+                position = motorOuttakeSlidesL.getCurrentPosition();
+                prevposition = position;
+                intakeSlides = true;
+            } else if (intakeSlides) {
+                //will correct the position of right side to counteract human error from belt tensioning velocity
+                motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motorOuttakeSlidesR.setVelocity(2000);
+                motorOuttakeSlidesR.setTargetPosition(motorOuttakeSlidesL.getCurrentPosition());
+                position = motorOuttakeSlidesL.getCurrentPosition();
+                prevposition = position;
+                intakeSlides = false;
+            }
+            if (prevposition != position && gamepad2.left_stick_y == 0) {
+                motorOuttakeSlidesR.setTargetPosition(position);
+                motorOuttakeSlidesL.setTargetPosition(position);
+                motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motorOuttakeSlidesR.setVelocity(2000);
+                motorOuttakeSlidesL.setVelocity(2000);
+                prevposition=position;
+            }
+        }
+
+        servoIntakeSlidesL.setPosition(0.7);
+        servoIntakeSlidesR.setPosition(0.7);
+
+    }
+                timerIntakeSlides.reset();
 
         if (gamepad1.right_trigger > 0) {
             y = -gamepad1.left_stick_y - gamepad1.right_stick_y; // Remember, this is reversed!
