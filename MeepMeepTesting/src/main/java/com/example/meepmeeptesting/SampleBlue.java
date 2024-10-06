@@ -14,29 +14,29 @@ public class SampleBlue{
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(100, 100, Math.toRadians(270), Math.toRadians(270), 15)
                 .build();
-        Vector2d yellow1 = new Vector2d(-47.9,-38.1);
-        Vector2d yellow2 = new Vector2d(-59.2,-38.1);
-        Vector2d yellow3 = new Vector2d(-67.5,-38.1);
-        Vector2d basket = new Vector2d(-47.9,-50.2);
+        Vector2d yellow1 = new Vector2d(47.9,38.1);
+        Vector2d yellow2 = new Vector2d(59.2,38.1);
+        Vector2d yellow3 = new Vector2d(67.5,38.1);
+        Vector2d basket = new Vector2d(47.9,50.2);
 
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-10, 61, Math.toRadians(90)))
-                .lineToYSplineHeading(-36,Math.toRadians(270))
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(10, 61, Math.toRadians(-90)))
+                .lineToYSplineHeading(36,Math.toRadians(90))
                 .waitSeconds(0.5)
-                .turn(Math.toRadians(-90))
+                .turn(Math.toRadians(90))
                 .strafeTo(yellow1)
-                .turn(Math.toRadians(-90))
+                .turn(Math.toRadians(90))
                 .waitSeconds(0.5)
-                .lineToYSplineHeading((-50.2),Math.toRadians(45))
+                .lineToYSplineHeading((50.2),Math.toRadians(-45))
                 .waitSeconds(0.5)
-                .turn(Math.toRadians(45))
+                .turn(Math.toRadians(-45))
                 .strafeTo(yellow2)
                 .waitSeconds(0.5)
-                .lineToYSplineHeading((-50.2),Math.toRadians(45))
+                .lineToYSplineHeading((50.2),Math.toRadians(-45))
                 .waitSeconds(0.5)
-                .turn(Math.toRadians(45))
-                .lineToYSplineHeading((-25.2),Math.toRadians(180))
+                .turn(Math.toRadians(-45))
+                .lineToYSplineHeading((25.2),Math.toRadians(-180))
                 .waitSeconds(0.5)
-                .splineTo(basket, Math.toRadians(45))
+                .splineTo(basket, Math.toRadians(-45))
                 .waitSeconds(0.5)
 
                 .build());
