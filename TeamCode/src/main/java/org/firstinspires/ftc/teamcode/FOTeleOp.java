@@ -234,7 +234,7 @@ public class FOTeleOp extends OpMode {
     }
                 timerIntakeSlides.reset();
 
->>>>>>> 8f335ed1723ae6aadf30800298b39b36ff7dd4c4
+>>>>>>> 8f335ed1723ae6aadf30800298b39b36ff7dd4c4    
         if (gamepad1.right_trigger > 0) {
             y = -gamepad1.left_stick_y - gamepad1.right_stick_y; // Remember, this is reversed!
             x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
