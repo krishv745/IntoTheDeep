@@ -21,12 +21,12 @@ public class SpecimenRed {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(100, 100, Math.toRadians(270), Math.toRadians(270), 15)
                 .build();
-// major rework in progress.
+
 
         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(10, -60, Math.toRadians(-90)))
                 .lineToY(-33)
                 .waitSeconds(0.5)
-//                .lineToY(-50)
+
                 .splineTo(home,Math.toRadians(50))
                 .waitSeconds(0.5)
                 .turn(Math.toRadians(-140))

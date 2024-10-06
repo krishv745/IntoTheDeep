@@ -6,14 +6,6 @@
     import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
     import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
-    import java.awt.Image;
-    import java.io.File;
-    import java.io.IOException;
-
-    import javax.imageio.ImageIO;
-
-    import kotlin.math.UMathKt;
-
     public class sampleRedMeepMeep {
         public static void main(String[] args) {
             MeepMeep meepMeep = new MeepMeep(700);
