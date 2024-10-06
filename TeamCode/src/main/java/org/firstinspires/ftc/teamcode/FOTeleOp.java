@@ -54,12 +54,12 @@ public class FOTeleOp extends OpMode {
     int prevposition = 0;
     boolean intakeSlides = false;
 
+    //Intake State
     public enum IntakeState {
         intakeIn,
         intakeOut,
-        intakeRotateDown,
+        intakeRotate,
         intakeRun,
-        intakeRotateUp,
         intakeRetract
     };
 //    public enum SampleDrop {
@@ -70,7 +70,7 @@ public class FOTeleOp extends OpMode {
 //    };
 
     //This is the timer for the arm
-    ElapsedTime timerIntakeSlides = new ElapsedTime();
+    ElapsedTime timerIntakeSlidesOut = new ElapsedTime();
     IntakeState intakeState = IntakeState.intakeIn;
 
     @Override
@@ -110,7 +110,7 @@ public class FOTeleOp extends OpMode {
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
 
-        timerIntakeSlides.reset();
+        timerIntakeSlidesOut.reset();
     }
 
     @Override
@@ -132,33 +132,39 @@ public class FOTeleOp extends OpMode {
 //            intakeOut,
 //            intakeRotateDown,
 //            intakeRun,
-//            intakeRotateUp,
 //            intakeRetract
 //        };
 
         switch (intakeState) {
             case intakeOut:
-                if (servoIntakeSlidesL.getPosition() >= 0.3 && servoIntakeSlidesR.getPosition() >= 0.3) {
+                if (servoIntakeSlidesL.getPosition() < 0.31 && servoIntakeSlidesR.getPosition() < 0.31) {
                     intakeSlidesPosL = servoIntakeSlidesL.getPosition();
                     intakeSlidesPosR = servoIntakeSlidesR.getPosition();
-                    if (signum(gamepad2.left_stick_y) == 1) {
+                    if (signum(gamepad2.right_stick_y) > 0 && timerIntakeSlidesOut.milliseconds() > 100) {
                         intakeSlidesPosL += 0.03;
                         intakeSlidesPosR += 0.03;
                         servoIntakeSlidesL.setPosition(intakeSlidesPosL);
                         servoIntakeSlidesR.setPosition(intakeSlidesPosR);
-                    } else if (signum(gamepad2.left_stick_y) == -1) {
+                        timerIntakeSlidesOut.reset();
+                    } else if (signum(gamepad2.right_stick_y) < 0 && timerIntakeSlidesOut.milliseconds() > 100) {
                         intakeSlidesPosL -= 0.03;
                         intakeSlidesPosR -= 0.03;
                         servoIntakeSlidesL.setPosition(intakeSlidesPosL);
                         servoIntakeSlidesR.setPosition(intakeSlidesPosR);
+                        timerIntakeSlidesOut.reset();
+                    } else {
+                        intakeState = IntakeState.intakeRotate;
                     }
                 }
-            case intakeRotateDown:
+            case intakeRotate:
                 if (gamepad2.start) {
                     if (servoIntakeRotate.getPosition() < 0.31) {
                         servoIntakeRotate.setPosition(0.6);
+                        intakeState = IntakeState.intakeRun;
                     } else if (servoIntakeRotate.getPosition() > 0.59) {
                         servoIntakeRotate.setPosition(0.3);
+                        intakeState = IntakeState.intakeRetract;
+
                     }
                 }
 
@@ -195,9 +201,6 @@ public class FOTeleOp extends OpMode {
         }
 
 
-<<<<<<< HEAD
-    
-=======
 
         if (servoIntakeSlidesL.getPosition() <= 0.31 && servoIntakeSlidesR.getPosition() <= 0.31) {
             if (gamepad2.left_stick_y != 0) {
@@ -232,9 +235,8 @@ public class FOTeleOp extends OpMode {
         servoIntakeSlidesR.setPosition(0.7);
 
     }
-                timerIntakeSlides.reset();
+                timerIntakeSlidesOut.reset();
 
->>>>>>> 8f335ed1723ae6aadf30800298b39b36ff7dd4c4
         if (gamepad1.right_trigger > 0) {
             y = -gamepad1.left_stick_y - gamepad1.right_stick_y; // Remember, this is reversed!
             x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
