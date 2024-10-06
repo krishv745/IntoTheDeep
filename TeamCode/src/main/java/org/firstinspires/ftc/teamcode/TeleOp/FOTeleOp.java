@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.IntakeRotate;
+import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.IntakeSlidesRetract;
+import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.OuttakeHold;
+import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.OuttakeRotate;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 
@@ -83,7 +88,7 @@ public class FOTeleOp extends OpMode {
     //This is the starting state
 
     IntakeState intakeState = IntakeState.intakeRest;
-
+    SampleDrop sampleDrop = SampleDrop.IntakeSlidesRetract;
     @Override
     public void init() {
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
@@ -177,6 +182,13 @@ public class FOTeleOp extends OpMode {
                 intakeState = intakeState.intakeRest;
         }
 
+        switch (sampleDrop){
+            case IntakeSlidesRetract:
+                
+            case IntakeRotate:
+            case OuttakeHold:
+            case OuttakeRotate:
+        }
 
 
         if (gamepad1.right_trigger > 0) {
