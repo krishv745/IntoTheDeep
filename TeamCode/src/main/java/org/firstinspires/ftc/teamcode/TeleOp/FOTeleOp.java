@@ -1,26 +1,18 @@
-package org.firstinspires.ftc.teamcode.TeleOp;
+package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.IntakeRotate;
-import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.IntakeSlidesRetract;
-import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.OuttakeHold;
-import static org.firstinspires.ftc.teamcode.TeleOp.FOTeleOp.SampleDrop.OuttakeRotate;
+import static java.lang.Math.signum;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
-
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -29,34 +21,45 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class FOTeleOp extends OpMode {
 
     IMU imu;
-    ColorSensor color;
+
+    //Drivetrain Motors
+    DcMotor motorFrontLeft;
+    DcMotor motorFrontRight;
+    DcMotor motorBackLeft;
+    DcMotor motorBackRight;
+    //Other Motors
+    DcMotorEx motorOuttakeSlidesL;
+    DcMotorEx motorOuttakeSlidesR;
+//    DcMotorEx rigSlidesMotor;
+    DcMotorEx motorTurret;
+
   
-    DcMotor frontLeftMotor;
-    DcMotor frontRightMotor;
-    DcMotor backLeftMotor;
-    DcMotor backRightMotor;
+    // (outtake servo) - one claw, one rotate claw,
+    // (intake servo) - 2 gecko wheels, one roller
   
-    DcMotorEx leftSlidesOuttakeMotor;
-    DcMotorEx rightSlidesOuttakeMotor;
-    DcMotorEx intakeSlidesMotor;
-    DcMotorEx turretMotor;
-
-
-    double y = 0;
-    double x = 0;
-    double rx = 0;
-    ElapsedTime timer;
-
+    //Outtake Servos
     Servo servoOutClaw;
     Servo servoOutRotate;
+    //Intake Servos
     CRServo servoInGeckoL;
     CRServo servoInGeckoR;
     CRServo servoInRoller;
-    Servo servoInWrist;
+    Servo servoIntakeRotate;
+    //Intake Slides Servos
+    Servo servoIntakeSlidesR;
+    Servo servoIntakeSlidesL;
 
+    //Variables
+    double y = 0;
+    double x = 0;
+    double rx = 0;
 
-    // (outtake servo) - one claw, one rotate claw,
-    // (intake servo) - 2 gecko wheels, one roller
+    double intakeSlidesPosL = 0;
+    double intakeSlidesPosR = 0;
+    int position = 0;
+    int prevposition = 0;
+    boolean intakeSlides = false;
+    ElapsedTime timer;
 
     // VALUES
 
@@ -68,21 +71,17 @@ public class FOTeleOp extends OpMode {
     final int ROLL_ON = 1;
     final int ROLL_OFF = 0;
     final int ROLL_OUT = -1;
-    final int IN_SLIDES_OUT = 4000;
-    final int IN_SLIDES_IN = 0;
     final double IN_SLIDES_TIMER = 10.0;
     final double wristdown = 0.0;
     final  double wristntr = 0.5;
 
+
+    //Intake State
     public enum IntakeState {
-        intakeRest,
-        intakeSlides,
-        intakeWheelIn,
-        intakeWheelOut,
-        intakeWrist
-
-
-
+        intakeIn,
+        intakeMove,
+        intakeRotate,
+        intakeRun
     };
     public enum SampleDrop {
         IntakeSlidesRetract,
@@ -91,50 +90,55 @@ public class FOTeleOp extends OpMode {
         OuttakeRotate
     };
 
-    //This is the timer for the arm
-    ElapsedTime armTimer = new ElapsedTime();
-    //This is the starting state
+    public enum OuttakeState {
+        outtakeLift,
+        outtakeBucket1,
+        outtakeBucket2,
+        outtakeSpec1,
+        outtakeSpec2,
+        outtakeDrop
+    }
 
-    IntakeState intakeState = IntakeState.intakeRest;
-    SampleDrop sampleDrop = SampleDrop.IntakeSlidesRetract;
+    //This is the timer for the arm
+    IntakeState intakeState = IntakeState.intakeIn;
+    OuttakeState outtakeState = OuttakeState.outtakeLift;
+
     @Override
     public void init() {
-        frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
-        frontRightMotor = hardwareMap.dcMotor.get("frontRight");
-        backLeftMotor = hardwareMap.dcMotor.get("backLeft");
-        backRightMotor = hardwareMap.dcMotor.get("backRight");
-        leftSlidesOuttakeMotor = (DcMotorEx) hardwareMap.dcMotor.get("outtakeLeft");
-        rightSlidesOuttakeMotor = (DcMotorEx) hardwareMap.dcMotor.get("outtakeRight");
-        intakeSlidesMotor = (DcMotorEx) hardwareMap.dcMotor.get("intake");
+        motorFrontLeft = hardwareMap.dcMotor.get("frontLeft");
+        motorFrontRight = hardwareMap.dcMotor.get("frontRight");
+        motorBackLeft = hardwareMap.dcMotor.get("backLeft");
+        motorBackRight = hardwareMap.dcMotor.get("backRight");
+        motorOuttakeSlidesL = (DcMotorEx) hardwareMap.dcMotor.get("outtakeLeft");
+        motorOuttakeSlidesR = (DcMotorEx) hardwareMap.dcMotor.get("outtakeRight");
+//        rigSlidesMotor = (DcMotorEx) hardwareMap.dcMotor.get("intake");
+        motorTurret = (DcMotorEx) hardwareMap.dcMotor.get("turret");
 
-//        turretMotor = (DcMotorEx) hardwareMap.dcMotor.get("turret");
-
-
-        frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftSlidesOuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightSlidesOuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeSlidesMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-//        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        leftSlidesOuttakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // vertical - 5000 ticks
-        rightSlidesOuttakeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        intakeSlidesMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // horizontal - 4000 ticks
+        motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorOuttakeSlidesL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorOuttakeSlidesR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        rigSlidesMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorTurret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         servoOutClaw = hardwareMap.servo.get("outClaw");
         servoOutRotate = hardwareMap.servo.get("outRotate");
+
         servoInRoller = (CRServo) hardwareMap.servo.get("inRoll");
-        servoInWrist =  hardwareMap.servo.get("inWrist");
         servoInGeckoL = (CRServo) hardwareMap.servo.get("geckoL");
         servoInGeckoR = (CRServo) hardwareMap.servo.get("geckoR");
         servoInGeckoR.setDirection(DcMotorSimple.Direction.REVERSE);
+      
+        servoIntakeRotate = hardwareMap.servo.get("inRotate");
+        servoIntakeSlidesR = hardwareMap.servo.get("inSlideR");
+        servoIntakeSlidesL = hardwareMap.servo.get("inSlideL");
 
         timer = new ElapsedTime();
 
         color = hardwareMap.get(ColorSensor.class, "Color");
+
 
         imu = hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
@@ -143,94 +147,179 @@ public class FOTeleOp extends OpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
+
+        timerIntakeSlidesOut.reset();
+        timerIntakeRetract.reset();
+        timerOuttakeSlides.reset();
     }
 
     @Override
     public void start() {
-
-        servoOutClaw.setPosition(CLAW_REST);
-        servoOutRotate.setPosition(ROTATE_REST);
-        servoInGeckoL.setPower(ROLL_OFF);
-        servoInGeckoR.setPower(ROLL_OFF);
-        servoInRoller.setPower(ROLL_OFF);
+        servoOutClaw.setPosition(0.3); //0.5
+        servoOutRotate.setPosition(0.15); //0.85
+        servoIntakeL.setPower(0); //1
+        servoIntakeR.setPower(0); //1
+        servoIntakeF.setPower(0); //1
+        servoIntakeRotate.setPosition(0.3); //0.6
+        servoIntakeSlidesL.setPosition(0.3); //0.7
+        servoIntakeSlidesR.setPosition(0.3); //0.7
     }
 
     @Override
     public void loop() {
 
         switch (intakeState) {
-            case intakeRest:
-                if (gamepad2.right_stick_y != 0) {
-                    intakeState = intakeState.intakeSlides;
-                }
-                if ((gamepad2.right_trigger > 0)||(gamepad2.left_trigger > 0)){
-                    intakeState = intakeState.intakeWrist;
-                }
-                if ((gamepad2.right_bumper)){
-                        intakeState = intakeState.intakeWheelIn;
-                }
-                if ((gamepad2.left_bumper)){
-                    intakeState = intakeState.intakeWheelIn;
-                }
-
-            case intakeSlides:
-                intakeSlidesMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                if(gamepad2.right_stick_y > 0) {
-                    if (intakeSlidesMotor.getCurrentPosition() < 4000) {
-                        while ((intakeSlidesMotor.getCurrentPosition() <= 4000)&&(gamepad2.right_stick_y > 0)) {
-                            intakeSlidesMotor.setPower(gamepad2.right_stick_y);
-                        }
-                        intakeState = intakeState.intakeRest;
+            case intakeMove:
+                if (servoIntakeSlidesL.getPosition() > 0.29 && servoIntakeSlidesL.getPosition() < 0.71) {
+                    intakeSlidesPosL = servoIntakeSlidesL.getPosition();
+                    intakeSlidesPosR = servoIntakeSlidesR.getPosition();
+                    timer.reset();
+                    if (signum(gamepad2.right_stick_y) != 0 && timer.milliseconds() > 100) {
+                        intakeSlidesPosL += signum(gamepad2.right_stick_y);
+                        intakeSlidesPosR += signum(gamepad2.right_stick_y);
+                        servoIntakeSlidesL.setPosition(intakeSlidesPosL);
+                        servoIntakeSlidesR.setPosition(intakeSlidesPosR);
+                        timer.reset();
+                    } else {
+                        intakeState = IntakeState.intakeRotate;
                     }
                 }
-                else{
-                    if (intakeSlidesMotor.getCurrentPosition() > 0) {
-                        while ((intakeSlidesMotor.getCurrentPosition() >= 0)&&(gamepad2.right_stick_y < 0)) {
-                            intakeSlidesMotor.setPower(gamepad2.right_stick_y);
+                break;
+            case intakeRotate:
+                if (signum(gamepad2.right_stick_y) != 0) {
+                    intakeState = IntakeState.intakeMove;
+                }
+                if (gamepad2.start) {
+                    if (servoIntakeRotate.getPosition() < 0.31) {
+                        servoIntakeRotate.setPosition(0.6);
+                        intakeState = IntakeState.intakeRun;
+                    } else if (servoIntakeRotate.getPosition() > 0.59) {
+                        timer.reset();
+                        servoIntakeRotate.setPosition(0.3);
+                        if (timerIntakeRetract.milliseconds() > 300) {
+                            servoIntakeSlidesL.setPosition(0.3);
+                            servoIntakeSlidesR.setPosition(0.3);
                         }
-                        intakeState = intakeState.intakeRest;
+                        intakeState = IntakeState.intakeIn;
                     }
                 }
-
-            case intakeWheelIn:
-                double distance = ((DistanceSensor) color).getDistance(DistanceUnit.CM);
-                while ((distance > 0.1)&&(gamepad2.right_bumper)) {
-                    servoInRoller.setPower(ROLL_ON);
-                    servoInGeckoL.setPower(ROLL_ON);
-                    servoInGeckoR.setPower(ROLL_ON);
-                    distance = ((DistanceSensor) color).getDistance(DistanceUnit.CM);
+                break;
+            case intakeRun:
+                while (gamepad2.right_bumper) {
+                    servoIntakeL.setPower(1);
+                    servoIntakeR.setPower(1);
+                    servoIntakeF.setPower(1);
+                } 
+                while (gamepad2.left_bumper) {
+                    servoIntakeL.setPower(-1);
+                    servoIntakeR.setPower(-1);
+                    servoIntakeF.setPower(-1);
                 }
-                servoInRoller.setPower(ROLL_OFF);
-                servoInGeckoL.setPower(ROLL_OFF);
-                servoInGeckoR.setPower(ROLL_OFF);
-                intakeState = intakeState.intakeRest;
-
-            case intakeWheelOut:
-                while (gamepad2.left_bumper){
-                    servoInRoller.setPower(ROLL_OUT);
-                    servoInGeckoL.setPower(-ROLL_OUT);
-                    servoInGeckoR.setPower(-ROLL_OUT);
-                }
-                servoInRoller.setPower(ROLL_OFF);
-                servoInGeckoL.setPower(ROLL_OFF);
-                servoInGeckoR.setPower(ROLL_OFF);
-                intakeState = intakeState.intakeRest;
-
-            case intakeWrist:
-                if (gamepad2.right_trigger != 0){
-                    servoInWrist.setPosition(wristdown);
-                } else if (gamepad2.left_trigger != 0) {
-                    servoInWrist.setPosition(wristntr);
-                }
-                intakeState = intakeState.intakeRest;
+            
+                servoIntakeL.setPower(0);
+                servoIntakeR.setPower(0);
+                servoIntakeF.setPower(0);
+                intakeState = IntakeState.intakeRotate;
+                
+                break;
         }
 
-        switch (sampleDrop){
-            case IntakeSlidesRetract:
-            case IntakeRotate:
-            case OuttakeHold:
-            case OuttakeRotate:
+        switch (outtakeState) {
+            case outtakeLift:
+                if (gamepad2.left_stick_y != 0) {
+                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motorOuttakeSlidesL.setVelocity(signum(gamepad2.left_stick_y) * 2000);
+                    motorOuttakeSlidesR.setVelocity(signum(gamepad2.left_stick_y) * 2000);
+                    position = motorOuttakeSlidesL.getCurrentPosition();
+                    prevposition = position;
+                    intakeSlides = true;
+                } else if (intakeSlides) {
+                    //will correct the position of right side to counteract human error from belt tensioning velocity
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    motorOuttakeSlidesR.setVelocity(2000);
+                    motorOuttakeSlidesR.setTargetPosition(motorOuttakeSlidesL.getCurrentPosition());
+                    position = motorOuttakeSlidesL.getCurrentPosition();
+                    prevposition = position;
+                    intakeSlides = false;
+                }
+                if (prevposition != position && gamepad2.left_stick_y == 0) {
+                    motorOuttakeSlidesR.setTargetPosition(position);
+                    motorOuttakeSlidesL.setTargetPosition(position);
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    motorOuttakeSlidesR.setVelocity(2000);
+                    motorOuttakeSlidesL.setVelocity(2000);
+                    prevposition = position;
+                }
+                outtakeState = OuttakeState.outtakeBucket1;
+                break;
+            case outtakeBucket1:
+                if (gamepad2.dpad_up) {
+                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motorOuttakeSlidesL.setVelocity(2000);
+                    motorOuttakeSlidesR.setVelocity(2000);
+                    motorOuttakeSlidesR.setTargetPosition(2000);
+                    motorOuttakeSlidesL.setTargetPosition(2000);
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    servoOutRotate.setPosition(0.85);
+                }
+                if (signum(gamepad2.right_stick_y) > 0 || signum(gamepad2.right_stick_y) < 0) {
+                    outtakeState = OuttakeState.outtakeLift;
+                }
+                break;
+            case outtakeBucket2:
+                if (gamepad2.dpad_down) {
+                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motorOuttakeSlidesL.setVelocity(2000);
+                    motorOuttakeSlidesR.setVelocity(2000);
+                    motorOuttakeSlidesR.setTargetPosition(4000);
+                    motorOuttakeSlidesL.setTargetPosition(4000);
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    servoOutRotate.setPosition(0.85);
+                }
+                if (signum(gamepad2.right_stick_y) > 0 || signum(gamepad2.right_stick_y) < 0) {
+                    outtakeState = OuttakeState.outtakeLift;
+                }
+                break;
+            case outtakeSpec1:
+                if (gamepad2.dpad_up) {
+                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motorOuttakeSlidesL.setVelocity(2000);
+                    motorOuttakeSlidesR.setVelocity(2000);
+                    motorOuttakeSlidesR.setTargetPosition(1500);
+                    motorOuttakeSlidesL.setTargetPosition(1500);
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    servoOutRotate.setPosition(0.85);
+                }
+                if (signum(gamepad2.right_stick_y) > 0 || signum(gamepad2.right_stick_y) < 0) {
+                    outtakeState = OuttakeState.outtakeLift;
+                }
+                break;
+            case outtakeSpec2:
+                if (gamepad2.dpad_up) {
+                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motorOuttakeSlidesL.setVelocity(2000);
+                    motorOuttakeSlidesR.setVelocity(2000);
+                    motorOuttakeSlidesR.setTargetPosition(3000);
+                    motorOuttakeSlidesL.setTargetPosition(3000);
+                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    servoOutRotate.setPosition(0.85);
+                }
+                if (signum(gamepad2.right_stick_y) > 0 || signum(gamepad2.right_stick_y) < 0) {
+                    outtakeState = OuttakeState.outtakeLift;
+                }
+                break;
         }
+
 
 
         if (gamepad1.right_trigger > 0) {
@@ -268,9 +357,9 @@ public class FOTeleOp extends OpMode {
         double backLeftPower = (rotY - rotX + rx) / denominator;
         double backRightPower = (rotY + rotX - rx) / denominator;
 
-        frontLeftMotor.setPower(frontLeftPower);
-        frontRightMotor.setPower(frontRightPower);
-        backLeftMotor.setPower(backLeftPower);
-        backRightMotor.setPower(backRightPower);
+        motorFrontLeft.setPower(frontLeftPower);
+        motorFrontRight.setPower(frontRightPower);
+        motorBackLeft.setPower(backLeftPower);
+        motorBackRight.setPower(backRightPower);
     }
 }
