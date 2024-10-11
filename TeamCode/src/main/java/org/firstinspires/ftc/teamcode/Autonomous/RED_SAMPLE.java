@@ -29,7 +29,7 @@ import org.firstinspires.ftc.teamcode.tuningVal.MecanumDrive;
 
 @Config
 @Autonomous(name = "RED_SAMPLE_AUTO", group = "Autonomous")
-public class RED_SAMPLE_TEST extends LinearOpMode {
+public class RED_SAMPLE extends LinearOpMode {
     
     public class Intake {
         private CRServo servoInGeckoL;
