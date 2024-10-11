@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import com.qualcomm.robotcore.hardware.IMU;
@@ -51,6 +52,8 @@ public class FOTeleOp extends OpMode {
     CRServo servoInGeckoL;
     CRServo servoInGeckoR;
     CRServo servoInRoller;
+    Servo servoInWrist;
+
 
     // (outtake servo) - one claw, one rotate claw,
     // (intake servo) - 2 gecko wheels, one roller
@@ -64,15 +67,20 @@ public class FOTeleOp extends OpMode {
     // Intake
     final int ROLL_ON = 1;
     final int ROLL_OFF = 0;
+    final int ROLL_OUT = -1;
     final int IN_SLIDES_OUT = 4000;
     final int IN_SLIDES_IN = 0;
     final double IN_SLIDES_TIMER = 10.0;
+    final double wristdown = 0.0;
+    final  double wristntr = 0.5;
 
     public enum IntakeState {
         intakeRest,
-        intakeSlideOut,
-        intakeWheelRun,
-        intakeSlideIn,
+        intakeSlides,
+        intakeWheelIn,
+        intakeWheelOut,
+        intakeWrist
+
 
 
     };
@@ -119,8 +127,10 @@ public class FOTeleOp extends OpMode {
         servoOutClaw = hardwareMap.servo.get("outClaw");
         servoOutRotate = hardwareMap.servo.get("outRotate");
         servoInRoller = (CRServo) hardwareMap.servo.get("inRoll");
+        servoInWrist =  hardwareMap.servo.get("inWrist");
         servoInGeckoL = (CRServo) hardwareMap.servo.get("geckoL");
         servoInGeckoR = (CRServo) hardwareMap.servo.get("geckoR");
+        servoInGeckoR.setDirection(DcMotorSimple.Direction.REVERSE);
 
         timer = new ElapsedTime();
 
@@ -150,41 +160,73 @@ public class FOTeleOp extends OpMode {
 
         switch (intakeState) {
             case intakeRest:
-                if (gamepad1.x) {
-                    intakeState = intakeState.intakeSlideOut;
+                if (gamepad2.right_stick_y != 0) {
+                    intakeState = intakeState.intakeSlides;
                 }
-            case intakeSlideOut:
-                timer.reset();
-                intakeSlidesMotor.setTargetPosition(IN_SLIDES_OUT);
-                while (timer.milliseconds() < IN_SLIDES_TIMER) {
+                if ((gamepad2.right_trigger > 0)||(gamepad2.left_trigger > 0)){
+                    intakeState = intakeState.intakeWrist;
+                }
+                if ((gamepad2.right_bumper)){
+                        intakeState = intakeState.intakeWheelIn;
+                }
+                if ((gamepad2.left_bumper)){
+                    intakeState = intakeState.intakeWheelIn;
+                }
 
+            case intakeSlides:
+                intakeSlidesMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                if(gamepad2.right_stick_y > 0) {
+                    if (intakeSlidesMotor.getCurrentPosition() < 4000) {
+                        while ((intakeSlidesMotor.getCurrentPosition() <= 4000)&&(gamepad2.right_stick_y > 0)) {
+                            intakeSlidesMotor.setPower(gamepad2.right_stick_y);
+                        }
+                        intakeState = intakeState.intakeRest;
+                    }
                 }
-                intakeState = intakeState.intakeWheelRun;
-            case intakeWheelRun:
+                else{
+                    if (intakeSlidesMotor.getCurrentPosition() > 0) {
+                        while ((intakeSlidesMotor.getCurrentPosition() >= 0)&&(gamepad2.right_stick_y < 0)) {
+                            intakeSlidesMotor.setPower(gamepad2.right_stick_y);
+                        }
+                        intakeState = intakeState.intakeRest;
+                    }
+                }
+
+            case intakeWheelIn:
                 double distance = ((DistanceSensor) color).getDistance(DistanceUnit.CM);
-                while (distance > 0.1) {
+                while ((distance > 0.1)&&(gamepad2.right_bumper)) {
                     servoInRoller.setPower(ROLL_ON);
                     servoInGeckoL.setPower(ROLL_ON);
                     servoInGeckoR.setPower(ROLL_ON);
+                    distance = ((DistanceSensor) color).getDistance(DistanceUnit.CM);
                 }
-
                 servoInRoller.setPower(ROLL_OFF);
                 servoInGeckoL.setPower(ROLL_OFF);
                 servoInGeckoR.setPower(ROLL_OFF);
+                intakeState = intakeState.intakeRest;
 
-                intakeState = intakeState.intakeSlideIn;
-            case intakeSlideIn:
-                timer.reset();
-                intakeSlidesMotor.setTargetPosition(IN_SLIDES_IN);
-                while (timer.milliseconds() < IN_SLIDES_TIMER) {
+            case intakeWheelOut:
+                while (gamepad2.left_bumper){
+                    servoInRoller.setPower(ROLL_OUT);
+                    servoInGeckoL.setPower(-ROLL_OUT);
+                    servoInGeckoR.setPower(-ROLL_OUT);
+                }
+                servoInRoller.setPower(ROLL_OFF);
+                servoInGeckoL.setPower(ROLL_OFF);
+                servoInGeckoR.setPower(ROLL_OFF);
+                intakeState = intakeState.intakeRest;
 
+            case intakeWrist:
+                if (gamepad2.right_trigger != 0){
+                    servoInWrist.setPosition(wristdown);
+                } else if (gamepad2.left_trigger != 0) {
+                    servoInWrist.setPosition(wristntr);
                 }
                 intakeState = intakeState.intakeRest;
         }
 
         switch (sampleDrop){
             case IntakeSlidesRetract:
-                
             case IntakeRotate:
             case OuttakeHold:
             case OuttakeRotate:
