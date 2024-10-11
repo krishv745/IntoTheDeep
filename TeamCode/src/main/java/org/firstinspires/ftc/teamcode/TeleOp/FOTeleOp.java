@@ -1,9 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.TeleOp;
 
 import static java.lang.Math.signum;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -34,6 +35,8 @@ public class FOTeleOp extends OpMode {
     DcMotorEx motorTurret;
 
   
+    ColorSensor color;
+    
     // (outtake servo) - one claw, one rotate claw,
     // (intake servo) - 2 gecko wheels, one roller
   
@@ -44,7 +47,7 @@ public class FOTeleOp extends OpMode {
     CRServo servoInGeckoL;
     CRServo servoInGeckoR;
     CRServo servoInRoller;
-    Servo servoIntakeRotate;
+    Servo servoInGeckoRotate;
     //Intake Slides Servos
     Servo servoIntakeSlidesR;
     Servo servoIntakeSlidesL;
@@ -83,12 +86,6 @@ public class FOTeleOp extends OpMode {
         intakeRotate,
         intakeRun
     };
-    public enum SampleDrop {
-        IntakeSlidesRetract,
-        IntakeRotate,
-        OuttakeHold,
-        OuttakeRotate
-    };
 
     public enum OuttakeState {
         outtakeLift,
@@ -98,8 +95,7 @@ public class FOTeleOp extends OpMode {
         outtakeSpec2,
         outtakeDrop
     }
-
-    //This is the timer for the arm
+    
     IntakeState intakeState = IntakeState.intakeIn;
     OuttakeState outtakeState = OuttakeState.outtakeLift;
 
@@ -131,7 +127,7 @@ public class FOTeleOp extends OpMode {
         servoInGeckoR = (CRServo) hardwareMap.servo.get("geckoR");
         servoInGeckoR.setDirection(DcMotorSimple.Direction.REVERSE);
       
-        servoIntakeRotate = hardwareMap.servo.get("inRotate");
+        servoInGeckoRotate = hardwareMap.servo.get("inRotate");
         servoIntakeSlidesR = hardwareMap.servo.get("inSlideR");
         servoIntakeSlidesL = hardwareMap.servo.get("inSlideL");
 
@@ -148,19 +144,16 @@ public class FOTeleOp extends OpMode {
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
 
-        timerIntakeSlidesOut.reset();
-        timerIntakeRetract.reset();
-        timerOuttakeSlides.reset();
     }
 
     @Override
     public void start() {
         servoOutClaw.setPosition(0.3); //0.5
         servoOutRotate.setPosition(0.15); //0.85
-        servoIntakeL.setPower(0); //1
-        servoIntakeR.setPower(0); //1
-        servoIntakeF.setPower(0); //1
-        servoIntakeRotate.setPosition(0.3); //0.6
+        servoInGeckoL.setPower(ROLL_OFF); //1
+        servoInGeckoR.setPower(ROLL_OFF); //1
+        servoInRoller.setPower(ROLL_OFF); //1
+        servoInGeckoRotate.setPosition(0.3); //0.6
         servoIntakeSlidesL.setPosition(0.3); //0.7
         servoIntakeSlidesR.setPosition(0.3); //0.7
     }
@@ -190,13 +183,13 @@ public class FOTeleOp extends OpMode {
                     intakeState = IntakeState.intakeMove;
                 }
                 if (gamepad2.start) {
-                    if (servoIntakeRotate.getPosition() < 0.31) {
-                        servoIntakeRotate.setPosition(0.6);
+                    if (servoInGeckoRotate.getPosition() < 0.31) {
+                        servoInGeckoRotate.setPosition(0.6);
                         intakeState = IntakeState.intakeRun;
-                    } else if (servoIntakeRotate.getPosition() > 0.59) {
+                    } else if (servoInGeckoRotate.getPosition() > 0.59) {
                         timer.reset();
-                        servoIntakeRotate.setPosition(0.3);
-                        if (timerIntakeRetract.milliseconds() > 300) {
+                        servoInGeckoRotate.setPosition(0.3);
+                        if (timer.milliseconds() > 300) {
                             servoIntakeSlidesL.setPosition(0.3);
                             servoIntakeSlidesR.setPosition(0.3);
                         }
@@ -206,19 +199,19 @@ public class FOTeleOp extends OpMode {
                 break;
             case intakeRun:
                 while (gamepad2.right_bumper) {
-                    servoIntakeL.setPower(1);
-                    servoIntakeR.setPower(1);
-                    servoIntakeF.setPower(1);
+                    servoInGeckoL.setPower(ROLL_ON);
+                    servoInGeckoR.setPower(ROLL_ON);
+                    servoInRoller.setPower(ROLL_ON);
                 } 
                 while (gamepad2.left_bumper) {
-                    servoIntakeL.setPower(-1);
-                    servoIntakeR.setPower(-1);
-                    servoIntakeF.setPower(-1);
+                    servoInGeckoL.setPower(ROLL_OUT);
+                    servoInGeckoR.setPower(ROLL_OUT);
+                    servoInRoller.setPower(ROLL_OUT);
                 }
             
-                servoIntakeL.setPower(0);
-                servoIntakeR.setPower(0);
-                servoIntakeF.setPower(0);
+                servoInGeckoL.setPower(ROLL_OFF);
+                servoInGeckoR.setPower(ROLL_OFF);
+                servoInRoller.setPower(ROLL_OFF);
                 intakeState = IntakeState.intakeRotate;
                 
                 break;
@@ -319,8 +312,7 @@ public class FOTeleOp extends OpMode {
                 }
                 break;
         }
-
-
+        
 
         if (gamepad1.right_trigger > 0) {
             y = -gamepad1.left_stick_y - gamepad1.right_stick_y; // Remember, this is reversed!
