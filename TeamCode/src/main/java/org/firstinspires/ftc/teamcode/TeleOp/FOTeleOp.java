@@ -7,13 +7,11 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -47,7 +45,7 @@ public class FOTeleOp extends OpMode {
     CRServo servoInGeckoL;
     CRServo servoInGeckoR;
     CRServo servoInRoller;
-    Servo servoInGeckoRotate;
+    Servo servoInRotate;
     //Intake Slides Servos
     Servo servoIntakeSlidesR;
     Servo servoIntakeSlidesL;
@@ -71,10 +69,16 @@ public class FOTeleOp extends OpMode {
     final double ROTATE_REST = 0.4;
 
     // Intake
+    final double IN_ROTATE_ENGAGE = 0.6;
+    final double IN_ROTATE_RETRACT = 0.3;
+
     final int ROLL_ON = 1;
     final int ROLL_OFF = 0;
     final int ROLL_OUT = -1;
+
     final double IN_SLIDES_TIMER = 10.0;
+    final double IN_SLIDES_REST = 0.3;
+
     final double wristdown = 0.0;
     final  double wristntr = 0.5;
 
@@ -127,7 +131,7 @@ public class FOTeleOp extends OpMode {
         servoInGeckoR = (CRServo) hardwareMap.servo.get("geckoR");
         servoInGeckoR.setDirection(DcMotorSimple.Direction.REVERSE);
       
-        servoInGeckoRotate = hardwareMap.servo.get("inRotate");
+        servoInRotate = hardwareMap.servo.get("inRotate");
         servoIntakeSlidesR = hardwareMap.servo.get("inSlideR");
         servoIntakeSlidesL = hardwareMap.servo.get("inSlideL");
 
@@ -153,9 +157,9 @@ public class FOTeleOp extends OpMode {
         servoInGeckoL.setPower(ROLL_OFF); //1
         servoInGeckoR.setPower(ROLL_OFF); //1
         servoInRoller.setPower(ROLL_OFF); //1
-        servoInGeckoRotate.setPosition(0.3); //0.6
-        servoIntakeSlidesL.setPosition(0.3); //0.7
-        servoIntakeSlidesR.setPosition(0.3); //0.7
+        servoInRotate.setPosition(IN_ROTATE_RETRACT); //0.6
+        servoIntakeSlidesL.setPosition(IN_SLIDES_REST); //0.7
+        servoIntakeSlidesR.setPosition(IN_SLIDES_REST); //0.7
     }
 
     @Override
@@ -183,15 +187,15 @@ public class FOTeleOp extends OpMode {
                     intakeState = IntakeState.intakeMove;
                 }
                 if (gamepad2.start) {
-                    if (servoInGeckoRotate.getPosition() < 0.31) {
-                        servoInGeckoRotate.setPosition(0.6);
+                    if (servoInRotate.getPosition() < (IN_ROTATE_RETRACT + 0.01)) {
+                        servoInRotate.setPosition(IN_ROTATE_ENGAGE);
                         intakeState = IntakeState.intakeRun;
-                    } else if (servoInGeckoRotate.getPosition() > 0.59) {
+                    } else if (servoInRotate.getPosition() > (IN_ROTATE_ENGAGE - 0.01)) {
                         timer.reset();
-                        servoInGeckoRotate.setPosition(0.3);
+                        servoInRotate.setPosition(IN_ROTATE_RETRACT);
                         if (timer.milliseconds() > 300) {
-                            servoIntakeSlidesL.setPosition(0.3);
-                            servoIntakeSlidesR.setPosition(0.3);
+                            servoIntakeSlidesL.setPosition(IN_SLIDES_REST);
+                            servoIntakeSlidesR.setPosition(IN_SLIDES_REST);
                         }
                         intakeState = IntakeState.intakeIn;
                     }
@@ -312,7 +316,7 @@ public class FOTeleOp extends OpMode {
                 }
                 break;
         }
-        
+
 
         if (gamepad1.right_trigger > 0) {
             y = -gamepad1.left_stick_y - gamepad1.right_stick_y; // Remember, this is reversed!
