@@ -259,23 +259,6 @@ public class FOTeleOp extends OpMode {
                 }
                 break;
             case outtakeLift:
-//                if (gamepad2.left_stick_y != 0) {
-//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    motorOuttakeSlidesL.setVelocity(signum(gamepad2.left_stick_y) * 2000);
-//                    motorOuttakeSlidesR.setVelocity(signum(gamepad2.left_stick_y) * 2000);
-//                    position = motorOuttakeSlidesL.getCurrentPosition();
-//                    prevposition = position;
-//                    intakeSlides = true;
-//                } else if (intakeSlides) {
-//                    //will correct the position of right side to counteract human error from belt tensioning velocity
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    motorOuttakeSlidesR.setVelocity(2000);
-//                    motorOuttakeSlidesR.setTargetPosition(motorOuttakeSlidesL.getCurrentPosition());
-//                    position = motorOuttakeSlidesL.getCurrentPosition();
-//                    prevposition = position;
-//                    intakeSlides = false;
-//                }
                 timer.reset();
                 if (gamepad2.left_stick_y != 0 && timer.milliseconds() > 100) {
                     outtakeSlidesPos += (int) (signum(gamepad2.left_stick_y) * 100);
@@ -283,77 +266,24 @@ public class FOTeleOp extends OpMode {
                     motorOuttakeSlidesL.setVelocity(outtakeSlidesPos);
                     timer.reset();
                 }
-//                if (prevposition != position && gamepad2.left_stick_y == 0) {
-//                    motorOuttakeSlidesR.setTargetPosition(position);
-//                    motorOuttakeSlidesL.setTargetPosition(position);
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    motorOuttakeSlidesR.setVelocity(2000);
-//                    motorOuttakeSlidesL.setVelocity(2000);
-//                    prevposition = position;
-//                }
                 outtakeState = OuttakeState.outtakeDrop;
                 break;
             case outtakeBucket1:
-//                if (gamepad2.dpad_up) {
-//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    motorOuttakeSlidesL.setVelocity(2000);
-//                    motorOuttakeSlidesR.setVelocity(2000);
-//                    motorOuttakeSlidesR.setTargetPosition(2000);
-//                    motorOuttakeSlidesL.setTargetPosition(2000);
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    servoOutRotate.setPosition(0.85);
-//                }
                 motorOuttakeSlidesL.setTargetPosition(OUT_SLIDE_BUCKET_1);
                 motorOuttakeSlidesR.setTargetPosition(OUT_SLIDE_BUCKET_1);
                 outtakeState = OuttakeState.outtakeDrop;
                 break;
             case outtakeBucket2:
-//                if (gamepad2.dpad_down) {
-//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    motorOuttakeSlidesL.setVelocity(2000);
-//                    motorOuttakeSlidesR.setVelocity(2000);
-//                    motorOuttakeSlidesR.setTargetPosition(4000);
-//                    motorOuttakeSlidesL.setTargetPosition(4000);
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    servoOutRotate.setPosition(0.85);
-//                }
                 motorOuttakeSlidesL.setTargetPosition(OUT_SLIDE_BUCKET_2);
                 motorOuttakeSlidesR.setTargetPosition(OUT_SLIDE_BUCKET_2);
                 outtakeState = OuttakeState.outtakeDrop;
                 break;
             case outtakeSpec1:
-//                if (gamepad2.dpad_up) {
-//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    motorOuttakeSlidesL.setVelocity(2000);
-//                    motorOuttakeSlidesR.setVelocity(2000);
-//                    motorOuttakeSlidesR.setTargetPosition(1500);
-//                    motorOuttakeSlidesL.setTargetPosition(1500);
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    servoOutRotate.setPosition(0.85);
-//                }
                 motorOuttakeSlidesL.setTargetPosition(OUT_SLIDE_SPEC_1);
                 motorOuttakeSlidesR.setTargetPosition(OUT_SLIDE_SPEC_1);
                 outtakeState = OuttakeState.outtakeDrop;
                 break;
             case outtakeSpec2:
-//                if (gamepad2.dpad_up) {
-//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    motorOuttakeSlidesL.setVelocity(2000);
-//                    motorOuttakeSlidesR.setVelocity(2000);
-//                    motorOuttakeSlidesR.setTargetPosition(3000);
-//                    motorOuttakeSlidesL.setTargetPosition(3000);
-//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    servoOutRotate.setPosition(0.85);
-//                }
                 motorOuttakeSlidesL.setTargetPosition(OUT_SLIDE_SPEC_2);
                 motorOuttakeSlidesR.setTargetPosition(OUT_SLIDE_SPEC_2);
                 outtakeState = OuttakeState.outtakeDrop;
