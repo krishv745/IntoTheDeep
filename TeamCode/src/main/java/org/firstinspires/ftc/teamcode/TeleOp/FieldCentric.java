@@ -71,11 +71,25 @@ public class FieldCentric extends LinearOpMode {
             double backLeftPower = (rotY - rotX + rx) / denominator;
             double frontRightPower = (rotY - rotX - rx) / denominator;
             double backRightPower = (rotY + rotX - rx) / denominator;
+            double min = 0.3;
+            double nor = 0.65;
+            if (gamepad1.left_trigger > 0.5){
+                FL.setPower(frontLeftPower);
+                BL.setPower(backLeftPower);
+                FR.setPower(frontRightPower);
+                BR.setPower(backRightPower);
+            } else if (gamepad1.left_trigger < 0.5) {
+                FL.setPower(frontLeftPower*min);
+                BL.setPower(backLeftPower*min);
+                FR.setPower(frontRightPower*min);
+                BR.setPower(backRightPower*min);
+            } else {
+                FL.setPower(frontLeftPower*nor);
+                BL.setPower(backLeftPower*nor);
+                FR.setPower(frontRightPower*nor);
+                BR.setPower(backRightPower*nor);
+            }
 
-            FL.setPower(frontLeftPower*0.5);
-            BL.setPower(backLeftPower*0.5);
-            FR.setPower(frontRightPower*0.5);
-            BR.setPower(backRightPower*0.5);
         }
     }
 }
