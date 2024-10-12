@@ -55,8 +55,7 @@ public class FOTeleOp extends OpMode {
     double x = 0;
     double rx = 0;
 
-    double intakeSlidesPosL = 0;
-    double intakeSlidesPosR = 0;
+
     int position = 0;
     int prevposition = 0;
     boolean intakeSlides = false;
@@ -64,6 +63,7 @@ public class FOTeleOp extends OpMode {
     // VALUES
 
     // Outtake
+    int outtakeSlidesPos = 0;
     final double CLAW_REST = 0.4;
     final double ROTATE_REST = 0.4;
     final int OUT_SLIDE_BASE = 100;
@@ -73,6 +73,9 @@ public class FOTeleOp extends OpMode {
     final int OUT_SLIDE_SPEC_2 = 3000;
 
     // Intake
+
+    double intakeSlidesPosL = 0;
+    double intakeSlidesPosR = 0;
     final double IN_ROTATE_ENGAGE = 0.6;
     final double IN_ROTATE_RETRACT = 0.3;
 
@@ -96,6 +99,7 @@ public class FOTeleOp extends OpMode {
     };
 
     public enum OuttakeState {
+        outtakeRest,
         outtakeLift,
         outtakeBucket1,
         outtakeBucket2,
@@ -116,6 +120,8 @@ public class FOTeleOp extends OpMode {
         motorBackRight = hardwareMap.dcMotor.get("backRight");
         motorOuttakeSlidesL = (DcMotorEx) hardwareMap.dcMotor.get("outtakeLeft");
         motorOuttakeSlidesR = (DcMotorEx) hardwareMap.dcMotor.get("outtakeRight");
+        motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        rigSlidesMotor = (DcMotorEx) hardwareMap.dcMotor.get("intake");
         motorTurret = (DcMotorEx) hardwareMap.dcMotor.get("turret");
 
@@ -235,6 +241,23 @@ public class FOTeleOp extends OpMode {
             outtakeState = OuttakeState.outtakeLift;
         }
         switch (outtakeState) {
+            case outtakeRest:
+                if (signum(gamepad2.left_stick_y) != 0) {
+                    outtakeState = OuttakeState.outtakeLift;
+                }
+                if (gamepad2.dpad_up) {
+                    outtakeState = OuttakeState.outtakeBucket1;
+                }
+                if (gamepad2.dpad_down) {
+                    outtakeState = OuttakeState.outtakeBucket2;
+                }
+                if (gamepad2.dpad_right) {
+                    outtakeState = OuttakeState.outtakeSpec1;
+                }
+                if (gamepad2.dpad_left) {
+                    outtakeState = OuttakeState.outtakeSpec2;
+                }
+                break;
             case outtakeLift:
 //                if (gamepad2.left_stick_y != 0) {
 //                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -253,71 +276,90 @@ public class FOTeleOp extends OpMode {
 //                    prevposition = position;
 //                    intakeSlides = false;
 //                }
-                if (gamepad2.left_stick_y != 0) {
-
+                timer.reset();
+                if (gamepad2.left_stick_y != 0 && timer.milliseconds() > 100) {
+                    outtakeSlidesPos += (int) (signum(gamepad2.left_stick_y) * 100);
+                    motorOuttakeSlidesR.setVelocity(outtakeSlidesPos);
+                    motorOuttakeSlidesL.setVelocity(outtakeSlidesPos);
+                    timer.reset();
                 }
-                if (prevposition != position && gamepad2.left_stick_y == 0) {
-                    motorOuttakeSlidesR.setTargetPosition(position);
-                    motorOuttakeSlidesL.setTargetPosition(position);
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    motorOuttakeSlidesR.setVelocity(2000);
-                    motorOuttakeSlidesL.setVelocity(2000);
-                    prevposition = position;
-                }
-                outtakeState = OuttakeState.outtakeBucket1;
+//                if (prevposition != position && gamepad2.left_stick_y == 0) {
+//                    motorOuttakeSlidesR.setTargetPosition(position);
+//                    motorOuttakeSlidesL.setTargetPosition(position);
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    motorOuttakeSlidesR.setVelocity(2000);
+//                    motorOuttakeSlidesL.setVelocity(2000);
+//                    prevposition = position;
+//                }
+                outtakeState = OuttakeState.outtakeDrop;
                 break;
             case outtakeBucket1:
-                if (gamepad2.dpad_up) {
-                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motorOuttakeSlidesL.setVelocity(2000);
-                    motorOuttakeSlidesR.setVelocity(2000);
-                    motorOuttakeSlidesR.setTargetPosition(2000);
-                    motorOuttakeSlidesL.setTargetPosition(2000);
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    servoOutRotate.setPosition(0.85);
-                }
+//                if (gamepad2.dpad_up) {
+//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    motorOuttakeSlidesL.setVelocity(2000);
+//                    motorOuttakeSlidesR.setVelocity(2000);
+//                    motorOuttakeSlidesR.setTargetPosition(2000);
+//                    motorOuttakeSlidesL.setTargetPosition(2000);
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    servoOutRotate.setPosition(0.85);
+//                }
+                motorOuttakeSlidesL.setTargetPosition(OUT_SLIDE_BUCKET_1);
+                motorOuttakeSlidesR.setTargetPosition(OUT_SLIDE_BUCKET_1);
+                outtakeState = OuttakeState.outtakeDrop;
                 break;
             case outtakeBucket2:
-                if (gamepad2.dpad_down) {
-                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motorOuttakeSlidesL.setVelocity(2000);
-                    motorOuttakeSlidesR.setVelocity(2000);
-                    motorOuttakeSlidesR.setTargetPosition(4000);
-                    motorOuttakeSlidesL.setTargetPosition(4000);
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    servoOutRotate.setPosition(0.85);
-                }
+//                if (gamepad2.dpad_down) {
+//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    motorOuttakeSlidesL.setVelocity(2000);
+//                    motorOuttakeSlidesR.setVelocity(2000);
+//                    motorOuttakeSlidesR.setTargetPosition(4000);
+//                    motorOuttakeSlidesL.setTargetPosition(4000);
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    servoOutRotate.setPosition(0.85);
+//                }
+                motorOuttakeSlidesL.setTargetPosition(OUT_SLIDE_BUCKET_2);
+                motorOuttakeSlidesR.setTargetPosition(OUT_SLIDE_BUCKET_2);
+                outtakeState = OuttakeState.outtakeDrop;
                 break;
             case outtakeSpec1:
-                if (gamepad2.dpad_up) {
-                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motorOuttakeSlidesL.setVelocity(2000);
-                    motorOuttakeSlidesR.setVelocity(2000);
-                    motorOuttakeSlidesR.setTargetPosition(1500);
-                    motorOuttakeSlidesL.setTargetPosition(1500);
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    servoOutRotate.setPosition(0.85);
-                }
+//                if (gamepad2.dpad_up) {
+//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    motorOuttakeSlidesL.setVelocity(2000);
+//                    motorOuttakeSlidesR.setVelocity(2000);
+//                    motorOuttakeSlidesR.setTargetPosition(1500);
+//                    motorOuttakeSlidesL.setTargetPosition(1500);
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    servoOutRotate.setPosition(0.85);
+//                }
+                motorOuttakeSlidesL.setTargetPosition(OUT_SLIDE_SPEC_1);
+                motorOuttakeSlidesR.setTargetPosition(OUT_SLIDE_SPEC_1);
+                outtakeState = OuttakeState.outtakeDrop;
                 break;
             case outtakeSpec2:
-                if (gamepad2.dpad_up) {
-                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motorOuttakeSlidesL.setVelocity(2000);
-                    motorOuttakeSlidesR.setVelocity(2000);
-                    motorOuttakeSlidesR.setTargetPosition(3000);
-                    motorOuttakeSlidesL.setTargetPosition(3000);
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    servoOutRotate.setPosition(0.85);
-                }
+//                if (gamepad2.dpad_up) {
+//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    motorOuttakeSlidesL.setVelocity(2000);
+//                    motorOuttakeSlidesR.setVelocity(2000);
+//                    motorOuttakeSlidesR.setTargetPosition(3000);
+//                    motorOuttakeSlidesL.setTargetPosition(3000);
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    servoOutRotate.setPosition(0.85);
+//                }
+                motorOuttakeSlidesL.setTargetPosition(OUT_SLIDE_SPEC_2);
+                motorOuttakeSlidesR.setTargetPosition(OUT_SLIDE_SPEC_2);
+                outtakeState = OuttakeState.outtakeDrop;
+                break;
+            case outtakeDrop:
+
                 break;
         }
 
