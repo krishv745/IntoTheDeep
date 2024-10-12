@@ -14,10 +14,10 @@ public class FieldCentric extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // Declare our motors
         // Make sure your ID's match your configuration
-        DcMotor FL = hardwareMap.dcMotor.get("FL");
-        DcMotor BL = hardwareMap.dcMotor.get("BL");
-        DcMotor FR = hardwareMap.dcMotor.get("FR");
-        DcMotor BR = hardwareMap.dcMotor.get("BR");
+        DcMotor FL = hardwareMap.dcMotor.get("frontLeft");
+        DcMotor BL = hardwareMap.dcMotor.get("backLeft");
+        DcMotor FR = hardwareMap.dcMotor.get("frontRight");
+        DcMotor BR = hardwareMap.dcMotor.get("backRight");
 
         // Reverse the right side motors. This may be wrong for your setup.
         // If your robot moves backwards when commanded to go forwards,
