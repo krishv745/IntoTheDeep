@@ -15,13 +15,11 @@ public class RobotCentric extends LinearOpMode {
         DcMotor BL = hardwareMap.dcMotor.get("backLeft");
         DcMotor FR = hardwareMap.dcMotor.get("frontRight");
         DcMotor BR = hardwareMap.dcMotor.get("backRight");
-<<<<<<< Updated upstream
-=======
         FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
->>>>>>> Stashed changes
+
 
         // Reverse the right side motors. This may be wrong for your setup.
         // If your robot moves backwards when commanded to go forwards,
