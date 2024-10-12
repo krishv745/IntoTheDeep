@@ -60,7 +60,6 @@ public class FOTeleOp extends OpMode {
     int position = 0;
     int prevposition = 0;
     boolean intakeSlides = false;
-    ElapsedTime timer;
 
     // VALUES
 
@@ -99,7 +98,8 @@ public class FOTeleOp extends OpMode {
         outtakeSpec2,
         outtakeDrop
     }
-    
+
+    ElapsedTime timer = new ElapsedTime();;
     IntakeState intakeState = IntakeState.intakeIn;
     OuttakeState outtakeState = OuttakeState.outtakeLift;
 
@@ -135,11 +135,8 @@ public class FOTeleOp extends OpMode {
         servoIntakeSlidesR = hardwareMap.servo.get("inSlideR");
         servoIntakeSlidesL = hardwareMap.servo.get("inSlideL");
 
-        timer = new ElapsedTime();
-
         color = hardwareMap.get(ColorSensor.class, "Color");
-
-
+        
         imu = hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -147,6 +144,8 @@ public class FOTeleOp extends OpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
+
+        timer.reset();
 
     }
 
