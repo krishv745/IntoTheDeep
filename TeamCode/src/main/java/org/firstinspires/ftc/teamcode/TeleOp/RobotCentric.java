@@ -11,17 +11,24 @@ public class RobotCentric extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // Declare our motors
         // Make sure your ID's match your configuration
-        DcMotor FL = hardwareMap.dcMotor.get("FL");
-        DcMotor BL = hardwareMap.dcMotor.get("BL");
-        DcMotor FR = hardwareMap.dcMotor.get("FR");
-        DcMotor BR = hardwareMap.dcMotor.get("BR");
+        DcMotor FL = hardwareMap.dcMotor.get("frontLeft");
+        DcMotor BL = hardwareMap.dcMotor.get("backLeft");
+        DcMotor FR = hardwareMap.dcMotor.get("frontRight");
+        DcMotor BR = hardwareMap.dcMotor.get("backRight");
+<<<<<<< Updated upstream
+=======
+        FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+>>>>>>> Stashed changes
 
         // Reverse the right side motors. This may be wrong for your setup.
         // If your robot moves backwards when commanded to go forwards,
         // reverse the left side instead.
         // See the note about this earlier on this page.
-        FR.setDirection(DcMotorSimple.Direction.REVERSE);
-        BR.setDirection(DcMotorSimple.Direction.REVERSE);
+        FL.setDirection(DcMotorSimple.Direction.REVERSE);
+        BL.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
 
@@ -41,10 +48,10 @@ public class RobotCentric extends LinearOpMode {
             double frontRightPower = (y - x - rx) / denominator;
             double backRightPower = (y + x - rx) / denominator;
 
-            FL.setPower(frontLeftPower);
-            BL.setPower(backLeftPower);
-            FR.setPower(frontRightPower);
-            BR.setPower(backRightPower);
+            FL.setPower(frontLeftPower*0.5);
+            BL.setPower(backLeftPower*0.5);
+            FR.setPower(frontRightPower*0.5);
+            BR.setPower(backRightPower*0.5);
         }
     }
 }
