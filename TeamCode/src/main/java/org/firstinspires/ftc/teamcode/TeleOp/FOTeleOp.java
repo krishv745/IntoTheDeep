@@ -66,6 +66,11 @@ public class FOTeleOp extends OpMode {
     // Outtake
     final double CLAW_REST = 0.4;
     final double ROTATE_REST = 0.4;
+    final int OUT_SLIDE_BASE = 100;
+    final int OUT_SLIDE_BUCKET_1 = 2000;
+    final int OUT_SLIDE_BUCKET_2 = 4000;
+    final int OUT_SLIDE_SPEC_1 = 1500;
+    final int OUT_SLIDE_SPEC_2 = 3000;
 
     // Intake
     final double IN_ROTATE_ENGAGE = 0.6;
@@ -225,24 +230,31 @@ public class FOTeleOp extends OpMode {
                 break;
         }
 
+
+        if (signum(gamepad2.right_stick_y) != 0) {
+            outtakeState = OuttakeState.outtakeLift;
+        }
         switch (outtakeState) {
             case outtakeLift:
+//                if (gamepad2.left_stick_y != 0) {
+//                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    motorOuttakeSlidesL.setVelocity(signum(gamepad2.left_stick_y) * 2000);
+//                    motorOuttakeSlidesR.setVelocity(signum(gamepad2.left_stick_y) * 2000);
+//                    position = motorOuttakeSlidesL.getCurrentPosition();
+//                    prevposition = position;
+//                    intakeSlides = true;
+//                } else if (intakeSlides) {
+//                    //will correct the position of right side to counteract human error from belt tensioning velocity
+//                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    motorOuttakeSlidesR.setVelocity(2000);
+//                    motorOuttakeSlidesR.setTargetPosition(motorOuttakeSlidesL.getCurrentPosition());
+//                    position = motorOuttakeSlidesL.getCurrentPosition();
+//                    prevposition = position;
+//                    intakeSlides = false;
+//                }
                 if (gamepad2.left_stick_y != 0) {
-                    motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motorOuttakeSlidesL.setVelocity(signum(gamepad2.left_stick_y) * 2000);
-                    motorOuttakeSlidesR.setVelocity(signum(gamepad2.left_stick_y) * 2000);
-                    position = motorOuttakeSlidesL.getCurrentPosition();
-                    prevposition = position;
-                    intakeSlides = true;
-                } else if (intakeSlides) {
-                    //will correct the position of right side to counteract human error from belt tensioning velocity
-                    motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    motorOuttakeSlidesR.setVelocity(2000);
-                    motorOuttakeSlidesR.setTargetPosition(motorOuttakeSlidesL.getCurrentPosition());
-                    position = motorOuttakeSlidesL.getCurrentPosition();
-                    prevposition = position;
-                    intakeSlides = false;
+
                 }
                 if (prevposition != position && gamepad2.left_stick_y == 0) {
                     motorOuttakeSlidesR.setTargetPosition(position);
@@ -267,9 +279,6 @@ public class FOTeleOp extends OpMode {
                     motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     servoOutRotate.setPosition(0.85);
                 }
-                if (signum(gamepad2.right_stick_y) > 0 || signum(gamepad2.right_stick_y) < 0) {
-                    outtakeState = OuttakeState.outtakeLift;
-                }
                 break;
             case outtakeBucket2:
                 if (gamepad2.dpad_down) {
@@ -282,9 +291,6 @@ public class FOTeleOp extends OpMode {
                     motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     servoOutRotate.setPosition(0.85);
-                }
-                if (signum(gamepad2.right_stick_y) > 0 || signum(gamepad2.right_stick_y) < 0) {
-                    outtakeState = OuttakeState.outtakeLift;
                 }
                 break;
             case outtakeSpec1:
@@ -299,9 +305,6 @@ public class FOTeleOp extends OpMode {
                     motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     servoOutRotate.setPosition(0.85);
                 }
-                if (signum(gamepad2.right_stick_y) > 0 || signum(gamepad2.right_stick_y) < 0) {
-                    outtakeState = OuttakeState.outtakeLift;
-                }
                 break;
             case outtakeSpec2:
                 if (gamepad2.dpad_up) {
@@ -314,9 +317,6 @@ public class FOTeleOp extends OpMode {
                     motorOuttakeSlidesR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     motorOuttakeSlidesL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     servoOutRotate.setPosition(0.85);
-                }
-                if (signum(gamepad2.right_stick_y) > 0 || signum(gamepad2.right_stick_y) < 0) {
-                    outtakeState = OuttakeState.outtakeLift;
                 }
                 break;
         }
