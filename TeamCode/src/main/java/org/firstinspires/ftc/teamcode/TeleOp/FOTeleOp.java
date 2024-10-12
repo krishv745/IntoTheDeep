@@ -165,6 +165,11 @@ public class FOTeleOp extends OpMode {
     public void loop() {
 
         switch (intakeState) {
+            case intakeIn:
+                if (signum(gamepad2.right_stick_y) != 0) {
+                    intakeState = IntakeState.intakeMove;
+                }
+                break;
             case intakeMove:
                 if (servoIntakeSlidesL.getPosition() > 0.29 && servoIntakeSlidesL.getPosition() < 0.71) {
                     intakeSlidesPosL = servoIntakeSlidesL.getPosition();
