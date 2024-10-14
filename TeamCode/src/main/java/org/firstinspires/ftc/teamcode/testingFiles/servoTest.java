@@ -21,7 +21,9 @@ public class servoTest extends LinearOpMode {
             } else if (gamepad1.dpad_left) {
                 val -= 0.05;
             }
-            testing.setPosition(val);
+            if (val > 0.06 && val < 0.94) {
+                testing.setPosition(val);
+            }
             telemetry.addData("pos = ", val);
             telemetry.update();
         }
