@@ -10,26 +10,30 @@ public class motorToTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         DcMotorEx testing = (DcMotorEx) hardwareMap.dcMotor.get("motor");
         testing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        int val = 1000;
+        testing.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        int val = 50;
         waitForStart();
         if(isStopRequested()) return;
         while (opModeIsActive()) {
             if (gamepad1.dpad_up) {
-                val += 1000;
+                val += 100;
             } else if (gamepad1.dpad_right) {
-                val += 500;
+                val += 50;
             } else if (gamepad1.dpad_down) {
-                val -= 1000;
+                val -= 100;
             } else if (gamepad1.dpad_left) {
-                val -= 500;
+                val -= 50;
             }
+
             if (gamepad1.a) {
                 testing.setPower(1);
             } else if (gamepad1.b) {
                 testing.setPower(0);
             }
-            // TODO - add limits
-            testing.setTargetPosition(val);
+
+            if (val > 0) {
+                testing.setTargetPosition(val);
+            }
             telemetry.addData("pos = ", val);
             telemetry.addData("power = ", testing.getPower());
             telemetry.update();
