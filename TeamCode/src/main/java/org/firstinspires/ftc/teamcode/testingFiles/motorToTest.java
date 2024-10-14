@@ -28,6 +28,7 @@ public class motorToTest extends LinearOpMode {
             } else if (gamepad1.b) {
                 testing.setPower(0);
             }
+            // TODO - add limits
             testing.setTargetPosition(val);
             telemetry.addData("pos = ", val);
             telemetry.addData("power = ", testing.getPower());
