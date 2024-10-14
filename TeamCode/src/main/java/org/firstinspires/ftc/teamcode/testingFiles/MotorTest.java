@@ -5,16 +5,31 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
     public class MotorTest extends LinearOpMode {
         DcMotorEx motor;
+
         @Override
         public void runOpMode() throws InterruptedException {
-            motor = hardwareMap.get(DcMotorEx.class, "arm");
-
-            // use braking to slow the motor down faster
+            motor = hardwareMap.get(DcMotorEx.class, "motor");
+            double val = 0.1;
             motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             waitForStart();
             while (opModeIsActive()) {
-                motor.setPower(0.5);
+
+            }
+            while (opModeIsActive()) {
+                if (gamepad1.dpad_up) {
+                    val += 0.1;
+                } else if (gamepad1.dpad_right) {
+                    val += 0.05;
+                } else if (gamepad1.dpad_down) {
+                    val -= 0.1;
+                } else if (gamepad1.dpad_left) {
+                }
+                if (gamepad1.a) {
+                    motor.setPower(0.1);
+                } else if (gamepad1.b) {
+                    motor.setPower(0.0);
+                }
             }
         }
     }
