@@ -130,6 +130,8 @@ public class PUSHBOT_RS extends LinearOpMode {
                 .waitSeconds(0.0001)
                 .splineTo(spawn3,Math.toRadians(-90))
                 .waitSeconds(0.0001)
+                .lineToX(-40)
+                .waitSeconds(0.0001)
                 .splineTo(basket,Math.toRadians(-135));
 
 //        TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose)
