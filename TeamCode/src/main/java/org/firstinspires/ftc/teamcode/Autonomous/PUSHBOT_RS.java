@@ -23,41 +23,37 @@ public class PUSHBOT_RS extends LinearOpMode {
 
         Vector2d basket = new Vector2d(-55,-55);
         Vector2d spawn2 = new Vector2d(-55,-15);
-        Vector2d spawn3 = new Vector2d(-65,-15);
-        TrajectoryActionBuilder pgm = drive.actionBuilder(initialPose)
+        Vector2d spawn3 = new Vector2d(-62,-15);
+        TrajectoryActionBuilder pbr = drive.actionBuilder(initialPose)
                 .lineToY(-10)
                 .waitSeconds(0.0001)
-                .turn(Math.toRadians(135))
+                .turn(Math.toRadians(145))
                 .waitSeconds(0.0001)
                 .splineTo(basket,Math.toRadians(-135))
+                .waitSeconds(0.0001)
                 .lineToX(-30)
                 .waitSeconds(0.0001)
                 .splineTo(spawn2,Math.toRadians(-90))
                 .waitSeconds(0.0001)
-                .splineTo(basket,Math.toRadians(-135))
-                .lineToX(-40)
+                .splineTo(basket,Math.toRadians(-90))
+                .waitSeconds(0.0001)
+                .splineTo(new Vector2d(-42, -10), Math.toRadians(180))
                 .waitSeconds(0.0001)
                 .splineTo(spawn3,Math.toRadians(-90))
                 .waitSeconds(0.0001)
-                .lineToX(-40)
+                .lineToY(-52)
                 .waitSeconds(0.0001)
-                .splineTo(basket,Math.toRadians(-135));
+                .splineTo(new Vector2d(-20,-15),Math.toRadians(0));
 
-
-        Action trajectoryActionCloseOut = pgm.fresh()
-                .splineTo(new Vector2d(-15,-15),Math.toRadians(0))
-                .build();
-
+        waitForStart();
 
         if (isStopRequested()) return;
 
-        Action trajectoryActionChosen;
-        trajectoryActionChosen = pgm.build();
+        Action trajRunner = pbr.build();
 
         Actions.runBlocking(
                 new SequentialAction(
-                        trajectoryActionChosen,
-                        trajectoryActionCloseOut
+                        trajRunner
                 )
         );
     }
