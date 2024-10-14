@@ -3,27 +3,33 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp
+@TeleOp(group = "testing")
 public class MotorTest extends LinearOpMode {
     DcMotorEx motor;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        ElapsedTime timer = new ElapsedTime();
         motor = hardwareMap.get(DcMotorEx.class, "motor");
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         double val = 0.1;
         boolean isOn = false;
         waitForStart();
         while (opModeIsActive()) {
-            if (gamepad1.dpad_up) {
-                val += 0.1;
-            } else if (gamepad1.dpad_right) {
-                val += 0.05;
-            } else if (gamepad1.dpad_down) {
-                val -= 0.1;
-            } else if (gamepad1.dpad_left) {
-                val -= 0.05;
+
+            if (timer.milliseconds() > 100) {
+                if (gamepad1.dpad_up) {
+                    val += 0.1;
+                } else if (gamepad1.dpad_right) {
+                    val += 0.05;
+                } else if (gamepad1.dpad_down) {
+                    val -= 0.1;
+                } else if (gamepad1.dpad_left) {
+                    val -= 0.05;
+                }
+                timer.reset();
             }
             if (gamepad1.a) {
                 isOn = !isOn;
