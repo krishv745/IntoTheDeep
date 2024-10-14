@@ -34,7 +34,7 @@ public class PUSHBOTRED  {
                 .splineTo(spawn3,Math.toRadians(-90))
                 .waitSeconds(0.0001)
                 .splineTo(basket,Math.toRadians(-135))
-                .splineTo(new Vector2d(-15,-15),Math.toRadians(0))
+                .splineTo(new Vector2d(-20,-15),Math.toRadians(0))
                 .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)
