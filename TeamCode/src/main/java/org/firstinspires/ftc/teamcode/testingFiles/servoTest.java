@@ -16,7 +16,7 @@ public class servoTest extends LinearOpMode {
         waitForStart();
         if(isStopRequested()) return;
         while (opModeIsActive()) {
-            if (timer.milliseconds() > 100) {
+            if (timer.milliseconds() > 250) {
                 if (gamepad1.dpad_up) {
                     val += 0.1;
                 } else if (gamepad1.dpad_right) {
@@ -30,7 +30,7 @@ public class servoTest extends LinearOpMode {
             }
             if (val > 0.06 && val < 0.94) {
                 testing.setPosition(val);
-                wait();
+
             }
             telemetry.addData("pos = ", val);
             telemetry.update();
