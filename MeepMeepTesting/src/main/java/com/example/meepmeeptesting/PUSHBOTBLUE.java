@@ -42,29 +42,6 @@ public class PUSHBOTBLUE  {
                 .splineTo(new Vector2d(20,15),Math.toRadians(180))
                 .build());
 
-        /*
-        * .lineToY(-10)
-                .waitSeconds(0.0001)
-                .turn(Math.toRadians(145))
-                .waitSeconds(0.0001)
-                .splineTo(basket,Math.toRadians(-135))
-                .waitSeconds(0.0001)
-                .lineToX(-30)
-                .waitSeconds(0.0001)
-                .splineTo(spawn2,Math.toRadians(-90))
-                .waitSeconds(0.0001)
-                .splineTo(basket,Math.toRadians(-90))
-                .waitSeconds(0.0001)
-                .splineTo(new Vector2d(-42, -10), Math.toRadians(180))
-                .waitSeconds(0.0001)
-                .splineTo(spawn3,Math.toRadians(-90))
-                .waitSeconds(0.0001)
-                .lineToY(-52)
-                .waitSeconds(0.0001)
-                .splineTo(new Vector2d(-20,-15),Math.toRadians(0))
-                .build());
-        * */
-
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
