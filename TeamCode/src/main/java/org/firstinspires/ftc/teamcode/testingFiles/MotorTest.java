@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             waitForStart();
             while (opModeIsActive()) {
-
             }
             while (opModeIsActive()) {
                 if (gamepad1.dpad_up) {
