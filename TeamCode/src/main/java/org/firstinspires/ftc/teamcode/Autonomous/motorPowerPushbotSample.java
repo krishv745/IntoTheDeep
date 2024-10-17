@@ -4,12 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Config
-@Autonomous(name = "lol", group = "Autonomous")
+@Config()
+@Autonomous(name = "motorLeft", group = "Pushbot")
 
 
 
-public class pushbotrudimentery extends LinearOpMode {
+public class motorPowerPushbotSample extends LinearOpMode {
     DcMotor backLeftDrive;
     DcMotor backRightDrive;
     DcMotor frontLeftDrive;
