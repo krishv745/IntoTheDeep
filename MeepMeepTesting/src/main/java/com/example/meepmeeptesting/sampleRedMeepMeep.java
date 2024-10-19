@@ -11,6 +11,7 @@
     import java.io.IOException;
 
     import javax.imageio.ImageIO;
+    import kotlin.math.UMathKt;
 
     public class sampleRedMeepMeep {
         public static void main(String[] args) {
@@ -48,26 +49,39 @@
                     .strafeTo(new Vector2d(-58,-60))
                     .build());
 
+            Vector2d yellow1 = new Vector2d(-47.9,-38.1);
+            Vector2d yellow2 = new Vector2d(-59.2,-38.1);
+            Vector2d yellow3 = new Vector2d(-67.5,-38.1);
+            Vector2d basket = new Vector2d(-47.9,-50.2);
+
+            myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-10, -61, Math.toRadians(90)))
+                    .lineToYSplineHeading(-36,Math.toRadians(270))
+                    .waitSeconds(0.5)
+                    .turn(Math.toRadians(-90))
+                    .strafeTo(yellow1)
+                    .turn(Math.toRadians(-90))
+                    .waitSeconds(0.5)
+                    .lineToYSplineHeading((-50.2),Math.toRadians(45))
+                    .waitSeconds(0.5)
+                    .turn(Math.toRadians(45))
+                    .strafeTo(yellow2)
+                    .waitSeconds(0.5)
+                    .lineToYSplineHeading((-50.2),Math.toRadians(45))
+                    .waitSeconds(0.5)
+                    .turn(Math.toRadians(45))
+                    .lineToYSplineHeading((-25.2),Math.toRadians(180))
+                    .waitSeconds(0.5)
+                    .splineTo(basket, Math.toRadians(45))
+                    .waitSeconds(0.5)
+                   
+           .build());
+
+
             meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)
                     .setDarkMode(true)
                     .setBackgroundAlpha(0.95f)
                     .addEntity(myBot)
                     .start();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         }

@@ -6,12 +6,12 @@ import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
-public class SpecimenRed {
+public class SpecimenBlue {
     public static void main(String[] args) {
 
-        Vector2d home = new Vector2d(55,-42);
-        Vector2d target = new Vector2d(10,-36);
-        Vector2d end = new Vector2d(60,-60);
+        Vector2d home = new Vector2d(-55,42);
+        Vector2d target = new Vector2d(-10,36);
+        Vector2d end = new Vector2d(-60,60);
 
 
 
@@ -23,11 +23,11 @@ public class SpecimenRed {
                 .build();
 
 
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(10, -60, Math.toRadians(-90)))
-                .lineToY(-33)
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-10, 60, Math.toRadians(90)))
+                .lineToY(33)
                 .waitSeconds(0.0001)
 
-                .splineTo(home,Math.toRadians(50))
+                .splineTo(home,Math.toRadians(-130))
                 .waitSeconds(0.0001)
                 .turn(Math.toRadians(-140))
                 .waitSeconds(0.0001)
@@ -37,7 +37,7 @@ public class SpecimenRed {
                 .waitSeconds(0.0001)
                 .strafeTo(target)
                 .waitSeconds(0.0001)
-                .splineTo(home,Math.toRadians(120))
+                .splineTo(home,Math.toRadians(-60))
                 .waitSeconds(0.0001)
                 .turn(Math.toRadians(-210))
                 .waitSeconds(0.0001)
